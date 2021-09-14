@@ -1,0 +1,8 @@
+.vs/
+bin/
+obj/
+_log/
+packages/
+*.rar
+old/
+.config/
