@@ -1,33 +1,64 @@
 ﻿using BaoApi.Services;
-using Base.Models;
 using Base.Services;
 using BaseWeb.Controllers;
-using BaseWeb.Extensions;
-using BaseWeb.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace BaoApi.Controllers
 {
     //[XgProgAuth]
-    //[ApiController]
+    [ApiController]
     //[Route("api/[controller]")]
     public class HomeController : XpCtrl
     {
-        [HttpPost("Home/GetStr")]
-        public string GetStr()
+        [HttpPost("Home/WhenLogin")]
+        public string WhenLogin()
         {
-            /*
-            //var http = _Http.GetHttp();
-            var session = _Http.GetSession();
-            session.Set("f1", "f1");
-            string f1 = session.Get<string>("f1");
-            var sessId = session.Id;
-            */
-            return "String 1";
+            return "When Login";
         }
 
+        [HttpPost("Home/Login")]
+        public IActionResult Login(JObject json)
+        {
+            var key = _Xp.GetAesKey();
+            var userId = _Str.AesDecode(json["info"].ToString(), key, key);
+            var token = new JwtSecurityToken(
+                claims: new[]
+                {
+                    new Claim(ClaimTypes.Name, userId),
+                },
+                expires: DateTime.Now.AddMinutes(60),
+                signingCredentials: new SigningCredentials(
+                    _Xp.GetJwtKey(),
+                    SecurityAlgorithms.HmacSha256
+                )
+            );
+
+            return Ok(new JwtSecurityTokenHandler().WriteToken(token));
+            /*
+            return Ok(new
+            {
+            token = new JwtSecurityTokenHandler().WriteToken(token),
+            //success = true,
+            //message = "登錄成功"
+            });
+            */
+        }
+
+        [Authorize]
+        [HttpPost("Home/AfterLogin")]
+        public string AfterLogin()
+        {
+            return "After Login";
+        }
+
+        /*
+        //return sessionId
         [HttpPost("Home/SetSession")]
         public string SetSession([FromBody] JObject json)
         {
@@ -40,7 +71,8 @@ where Id=@Id
 ";
             var row = _Db.GetJson(sql, new List<object>() { "Id", id });
             if (row == null)
-                return "Id is wrong.";
+                return "";
+            //return "Id is wrong.";
 
             #region set base user info
             //var userId = row["UserId"].ToString();
@@ -56,12 +88,13 @@ where Id=@Id
             //4.set session of base user info
             var session = _Http.GetSession();
             session.Set(_Fun.BaseUser, userInfo);   //extension method
-            var info2 = session.Get<BaseUserDto>(_Fun.BaseUser);
-            var ssid = session.Id;
-            return "";
+            //var info2 = session.Get<BaseUserDto>(_Fun.BaseUser);
+            //Response.Cookies.Append(SessionDefaults.CookieName, session.Id,
+            //    new CookieOptions() { Expires = DateTime.Now.AddMinutes(60) });
+            return SessionDefaults.CookieName + "=" + session.Id;
+            //return "";
         }
 
-        /*
         [HttpPost("Home/GetPage0")]
         public ContentResult GetPage0()
         {

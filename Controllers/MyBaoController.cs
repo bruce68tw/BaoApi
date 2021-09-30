@@ -12,16 +12,17 @@ namespace BaoApi.Controllers
 {
     [Authorize]
     [ApiController]
-    public class BaoController : XpCtrl
+    public class MyBaoController : XpCtrl
     {
-        [HttpPost("Bao/GetPage")]
+        [HttpPost("MyBao/GetPage")]
         public async Task<ContentResult> GetPage(EasyDtDto dt)
         {
-            return JsonToCnt(await new BaoRead().GetPageAsync(Ctrl, dt));
+            return JsonToCnt(await new MyBaoRead().GetPageAsync(Ctrl, dt));
         }
 
-        [HttpPost("Bao/GetDetail")]
-        public async Task<ContentResult> GetDetail(JObject json)
+        /*
+        [HttpPost("MyBao/GetDetail")]
+        public ContentResult GetDetail(JObject json)
         {
             var sql = @"
 select b.*,
@@ -36,11 +37,12 @@ from dbo.Bao b
 join dbo.UserCust u on b.Creator=u.Id
 where b.Id=@Id
 ";
-            var row = await _Db.GetJsonAsync(sql, 
+            var row = _Db.GetJson(sql, 
                 new List<object>() { "Id", json["id"].ToString()}
             );
             return JsonToCnt(row);
         }
+        */
 
     }//class
 }

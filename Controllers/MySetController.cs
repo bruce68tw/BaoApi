@@ -5,17 +5,19 @@ using BaseWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BaoApi.Controllers
 {
+    [ApiController]
     public class MySetController : XpCtrl
     {
         //return Id or error msg(0:xxx)
         [HttpPost("MySet/Create")]
-        public string Create([FromBody] JObject json)
+        public async Task<string> Create(JObject json)
         {
             var key = _Xp.GetAesKey();
-            var row = _Json.StrToJson(_Str.AesDecode(json["row"].ToString(), key, key));
+            var row = _Str.ToJson(_Str.AesDecode(json["row"].ToString(), key, key));
             var sql = @"
 insert into dbo.UserApp(Id,Name,Phone,Email,Address,Created) values(
 @Id,@Name,@Phone,@Email,@Address,@Created
@@ -30,17 +32,17 @@ insert into dbo.UserApp(Id,Name,Phone,Email,Address,Created) values(
                 "Address", row["Address"].ToString(),
                 "Created", _Date.NowDbStr(),
             };
-            return (_Db.ExecSql(sql, args) == 1)
+            return (await _Db.ExecSqlAsync(sql, args) == 1)
                 ? newId 
-                : _Str.GetError();
+                : _Str.GetPreError();
         }
 
         //return error msg if any
         [HttpPost("MySet/Update")]
-        public string Update([FromBody] JObject json)
+        public async Task<string> Update(JObject json)
         {
             var key = _Xp.GetAesKey();
-            var row = _Json.StrToJson(_Str.AesDecode(json["row"].ToString(), key, key));
+            var row = _Str.ToJson(_Str.AesDecode(json["row"].ToString(), key, key));
             var sql = @"
 update dbo.UserApp set
     Name=@Name,
@@ -56,18 +58,18 @@ where Id=@Id";
                 "Revised", _Date.NowDbStr(),
                 "Id", _Fun.GetBaseUser().UserId,
             };
-            return (_Db.ExecSql(sql, args) == 1)
+            return (await _Db.ExecSqlAsync(sql, args) == 1)
                 ? "" 
                 : _Fun.SystemError;
         }
 
         [HttpPost("MySet/GetRow")]
-        public ContentResult GetRow([FromBody] JObject json)
+        public async Task<ContentResult> GetRow(JObject json)
         {
             var key = _Xp.GetAesKey();
             var id = _Str.AesDecode(json["id"].ToString(), key, key);
             var sql = "select * from UserApp where Id=@Id";
-            var row = _Db.GetJson(sql, new List<object>() { "Id", id });
+            var row = await _Db.GetJsonAsync(sql, new List<object>() { "Id", id });
             return JsonToCnt(row); ;
         }
 

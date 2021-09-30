@@ -1,28 +1,24 @@
-﻿using Base.Enums;
-using Base.Models;
+﻿using Base.Models;
 using Base.Services;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 
 namespace BaoApi.Services
 {
-    public class BaoRead
+    public class MyBaoRead
     {
         private ReadDto readDto = new ReadDto()
         {
-            ReadSql = @"
+            ReadSql = $@"
 select checked=0, isMove=b.IsMove, giftType=b.GiftType, 
     startTime=b.StartTime, corp=c.Name,
     id=b.Id, name=b.Name
 from dbo.Bao b
 join dbo.UserCust c on b.Creator=c.Id
-order by b.Id desc
+join dbo.UserBao ub on b.Id=ub.BaoId
+where ub.UserId='{_Fun.GetBaseUser().UserId}'
+order by ub.Created desc
 ",
-            /*
-            Items = new [] {
-                new QitemDto { Fid = "Name", Op = ItemOpEstr.Like },
-            },
-            */
         };
 
         public async Task<JObject> GetPageAsync(string ctrl, EasyDtDto easyDto)
