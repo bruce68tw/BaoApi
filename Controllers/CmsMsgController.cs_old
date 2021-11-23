@@ -12,37 +12,27 @@ namespace BaoApi.Controllers
 {
     [Authorize]
     [ApiController]
-    public class MyBaoController : ApiCtrl
+    public class CmsMsgController : ApiCtrl
     {
-        [HttpPost("MyBao/GetPage")]
+        [HttpPost("CmsMsg/GetPage")]
         public async Task<ContentResult> GetPage(EasyDtDto dt)
         {
-            return JsonToCnt(await new MyBaoRead().GetPageAsync(dt));
+            return JsonToCnt(await new CmsMsgRead().GetPageAsync(dt));
         }
 
-        /*
-        [HttpPost("MyBao/GetDetail")]
-        public ContentResult GetDetail(JObject json)
+        [HttpPost("CmsMsg/GetDetail")]
+        public async Task<ContentResult> GetDetail(JObject json)
         {
             var sql = @"
-select b.*,
-    Corp=u.Name,
-    u.IsCorp,
-    JoinCount=(
-		select count(*) 
-		from dbo.Attend
-		where BaoId=@Id
-	)
-from dbo.Bao b
-join dbo.UserCust u on b.Creator=u.Id
-where b.Id=@Id
+select *
+from dbo.Cms
+where Id=@Id
 ";
-            var row = _Db.GetJson(sql, 
+            var row = await _Db.GetJsonAsync(sql, 
                 new List<object>() { "Id", json["id"].ToString()}
             );
             return JsonToCnt(row);
         }
-        */
 
     }//class
 }

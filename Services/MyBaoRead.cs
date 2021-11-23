@@ -7,23 +7,23 @@ namespace BaoApi.Services
 {
     public class MyBaoRead
     {
-        private ReadDto readDto = new ReadDto()
+        private readonly ReadDto readDto = new()
         {
             ReadSql = $@"
-select checked=0, isMove=b.IsMove, giftType=b.GiftType, 
-    startTime=b.StartTime, corp=c.Name,
-    id=b.Id, name=b.Name
+select Checked=0, b.IsMove, b.GiftType, 
+    b.StartTime, Corp=c.Name,
+    b.Id, b.Name
 from dbo.Bao b
 join dbo.UserCust c on b.Creator=c.Id
-join dbo.UserBao ub on b.Id=ub.BaoId
-where ub.UserId='{_Fun.GetBaseUser().UserId}'
-order by ub.Created desc
+join dbo.Attend a on b.Id=a.BaoId
+where a.UserId='{_Fun.UserId()}'
+order by a.Created desc
 ",
         };
 
-        public async Task<JObject> GetPageAsync(string ctrl, EasyDtDto easyDto)
+        public async Task<JObject> GetPageAsync(EasyDtDto easyDto)
         {
-            return await new CrudRead().GetPageAsync(ctrl, readDto, easyDto);
+            return await new CrudRead().GetPageAsync(readDto, easyDto);
         }
 
     } //class

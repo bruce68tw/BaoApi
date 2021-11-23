@@ -14,13 +14,13 @@ namespace BaoApi.Services
 				Table = "dbo.[CustInput]",
                 PkeyFid = "Id",
                 Col4 = null,
-                Items = new [] 
+                Items = new EitemDto[] 
 				{
-					new EitemDto { Fid = "Id" },
-                    new EitemDto { Fid = "FldCheck", Required = true },
-                    new EitemDto { Fid = "FldDate", Required = true },
-                    new EitemDto { Fid = "FldDt", Required = true },
-                    new EitemDto { Fid = "FldDec", Required = true },
+					new() { Fid = "Id" },
+                    new() { Fid = "FldCheck", Required = true },
+                    new() { Fid = "FldDate", Required = true },
+                    new() { Fid = "FldDt", Required = true },
+                    new() { Fid = "FldDec", Required = true },
                 },
             };
         }

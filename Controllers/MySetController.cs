@@ -1,7 +1,7 @@
 ﻿using BaoApi.Services;
 using Base.Services;
-using BaseWeb.Controllers;
-using BaseWeb.Services;
+using BaseApi.Controllers;
+using BaseApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 namespace BaoApi.Controllers
 {
     [ApiController]
-    public class MySetController : XpCtrl
+    public class MySetController : ApiCtrl
     {
-        //return Id or error msg(0:xxx)
+        //return new Id or ''(error)
         [HttpPost("MySet/Create")]
         public async Task<string> Create(JObject json)
         {
@@ -34,7 +34,7 @@ insert into dbo.UserApp(Id,Name,Phone,Email,Address,Created) values(
             };
             return (await _Db.ExecSqlAsync(sql, args) == 1)
                 ? newId 
-                : _Str.GetPreError();
+                : "";
         }
 
         //return error msg if any
@@ -56,7 +56,7 @@ where Id=@Id";
                 "Email", row["Email"].ToString(),
                 "Address", row["Address"].ToString(),
                 "Revised", _Date.NowDbStr(),
-                "Id", _Fun.GetBaseUser().UserId,
+                "Id", _Fun.UserId(),
             };
             return (await _Db.ExecSqlAsync(sql, args) == 1)
                 ? "" 

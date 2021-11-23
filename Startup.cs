@@ -3,7 +3,6 @@ using BaoApi.Services;
 using Base.Enums;
 using Base.Models;
 using Base.Services;
-using BaseWeb.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,10 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
 using System.Data.Common;
 using System.Data.SqlClient;
-using System.Text;
 
 namespace BaoApi
 {
@@ -99,7 +96,7 @@ namespace BaoApi
         {
             //initial & set locale
             _Fun.Init(env.IsDevelopment(), app.ApplicationServices, DbTypeEnum.MSSql);
-            _Locale.SetCulture(_Fun.Config.Locale);
+            //_Locale.SetCultureAsync(_Fun.Config.Locale);
 
             if (env.IsDevelopment())
             {
