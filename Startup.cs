@@ -29,12 +29,14 @@ namespace BaoApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //1.JSON控制
             services.AddControllers()
                 //use pascal for newtonSoft json, need mvc.newtonSoft !!
                 .AddNewtonsoftJson(opts => { opts.UseMemberCasing(); })
                 //use pascal for MVC json
                 .AddJsonOptions(opts => { opts.JsonSerializerOptions.PropertyNamingPolicy = null; });
 
+            //2.Swagger API文件
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BaoApi", Version = "v1" });
@@ -60,19 +62,7 @@ namespace BaoApi
             Configuration.GetSection("XpConfig").Bind(xpConfig);
             _Xp.Config = xpConfig;
 
-            /*
-            //7.session (memory cache)
-            services.AddDistributedMemoryCache();
-            //services.AddStackExchangeRedisCache(opts => { opts.Configuration = "127.0.0.1:6379"; });
-            services.AddSession(opts =>
-            {
-                opts.Cookie.HttpOnly = true;
-                opts.Cookie.IsEssential = true;
-                opts.IdleTimeout = TimeSpan.FromMinutes(60);
-            });
-            */
-
-            //jwt認證
+            //jwt驗證
             services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opts => {
@@ -82,10 +72,11 @@ namespace BaoApi
                         ValidateAudience = false,
                         ValidateLifetime = true,  //是否驗證超時  當設置exp和nbf時有效 
                         ValidateIssuerSigningKey = true,  //是否驗證密鑰
-                        //ValidAudience = "http://localhost:49999",//Audience
-                        //ValidIssuer = "http://localhost:49998",//Issuer，這兩項和登陸時頒發的一致
                         IssuerSigningKey = _Xp.GetJwtKey(),     //SecurityKey
-                        //緩衝過期時間，總的有效時間等於這個時間加上jwt的過期時間，如果不配置，默認是5分鐘                                                                                                            //注意這是緩衝過期時間，總的有效時間等於這個時間加上jwt的過期時間，如果不配置，默認是5分鐘
+
+                        //ValidAudience = "http://localhost:49999",//Audience
+                        //ValidIssuer = "http://localhost:49998",//Issuer，這兩項和登入時頒發的一致
+                        //緩衝過期時間，總的有效時間等於這個時間加上jwt的過期時間，預設為5分鐘                                                                                                            //注意這是緩衝過期時間，總的有效時間等於這個時間加上jwt的過期時間，如果不配置，默認是5分鐘
                         //ClockSkew = TimeSpan.FromMinutes(60)   //設置過期時間
                     };
                 });
@@ -94,9 +85,12 @@ namespace BaoApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //initial & set locale
+            //1.initial & set locale
             _Fun.Init(env.IsDevelopment(), app.ApplicationServices, DbTypeEnum.MSSql);
             //_Locale.SetCultureAsync(_Fun.Config.Locale);
+
+            //2.global exception handler
+            app.UseExceptionHandler("/Home/Error");
 
             if (env.IsDevelopment())
             {
@@ -107,6 +101,8 @@ namespace BaoApi
 
             app.UseHttpsRedirection();
             app.UseRouting();
+
+            //3.Authorize
             app.UseAuthentication();    //認証
             app.UseAuthorization();     //授權
 
@@ -117,6 +113,14 @@ namespace BaoApi
             {
                 endpoints.MapControllers();
             });
+            /*
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
+            */
         }
     }
 }

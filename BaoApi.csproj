@@ -6,16 +6,31 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="_log\**" />
+    <Content Remove="_log\**" />
+    <EmbeddedResource Remove="_log\**" />
+    <None Remove="_log\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="web.config" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="Controllers\CmsMsgController.cs_old" />
-    <None Remove="Services\BaoEdit.cs_old" />
+    <None Remove="Controllers\zz_CmsMsgController.cs_old" />
+    <None Remove="Controllers\zz_XpCmsController.cs_old" />
+    <None Remove="Services\CmsMsgRead.cs_old" />
+    <None Remove="Services\zz_XpCmsEdit.cs_old" />
+    <None Remove="Services\zz_XpCmsRead.cs_old" />
+    <None Remove="_image\noImage.jpg" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Services\BaoEdit.cs_old" />
+    <Content Include="_image\noImage.jpg">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -27,11 +42,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BaoLib\BaoLib.csproj" />
     <ProjectReference Include="..\Base\BaseApi\BaseApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="_image\" />
+    <Folder Include="Enums\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties properties_4launchsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>

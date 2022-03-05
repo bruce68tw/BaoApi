@@ -1,4 +1,5 @@
 ﻿using BaoApi.Services;
+using BaoLib.Enums;
 using Base.Models;
 using BaseApi.Controllers;
 using Microsoft.AspNetCore.Authorization;
@@ -8,21 +9,27 @@ using System.Threading.Tasks;
 
 namespace BaoApi.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("[controller]/[action]")]
-    public class BaoController : ApiCtrl
+    public class CmsController : ApiCtrl
     {
         [HttpPost]
         public async Task<ContentResult> GetPage([BindRequired] EasyDtDto dt)
         {
-            return JsonToCnt(await new BaoRead().GetPageAsync(dt));
+            return JsonToCnt(await new CmsRead().GetPageAsync(dt));
         }
 
         [HttpPost]
         public async Task<ContentResult> GetDetail([BindRequired] string id)
         {
-            return JsonToCnt(await new BaoService().GetDetailAsync(id));
+            return JsonToCnt(await new CmsService().GetDetailAsync(id));
+        }
+
+        [HttpPost]
+        public async Task<FileResult> ViewFile(string id, string ext)
+        {
+            return await _Xp.ViewCmsTypeAsync("FileName", id, ext, CmsTypeEstr.Card);
         }
 
     }//class

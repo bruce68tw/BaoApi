@@ -11,8 +11,10 @@
             //DirStageImage = "";
         }
 
-        //db connect string
+        //folder of stage image
         public string DirStageImage { get; set; }
 
+        //folder of Cms
+        public string DirCms { get; set; }
     }
 }

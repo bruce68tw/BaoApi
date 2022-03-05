@@ -6,6 +6,7 @@ namespace BaoApi.Controllers
 {
     [Authorize]
     [ApiController]
+    [Route("[controller]/[action]")]
     public class CmsMsgController : XpCmsController
     {
         public CmsMsgController()

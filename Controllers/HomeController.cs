@@ -1,56 +1,41 @@
 ﻿using BaoApi.Services;
+using Base.Models;
 using Base.Services;
 using BaseApi.Controllers;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Threading.Tasks;
 
 namespace BaoApi.Controllers
 {
     [ApiController]
+    [Route("[controller]/[action]")]
     public class HomeController : ApiCtrl
     {
-        [HttpPost("Home/WhenLogin")]
-        public string WhenLogin()
+        /// <summary>
+        /// login and get token
+        /// </summary>
+        /// <param name="info">info: AES userId</param>
+        /// <returns>JObject, {token,baoIds}</returns>
+        [HttpPost]
+        public async Task<ContentResult> Login([BindRequired] string info)
         {
-            //userId same to flutter
-            return _Xp.UserIdEncode("650TZLT38A");
+            return JsonToCnt(await new HomeService().LoginAsync(info));
         }
 
-        //login and get token
-        //info: AES userId
-        [HttpPost("Home/Login")]
-        public IActionResult Login(JObject json)
+        //register in Startup.cs
+        [HttpGet]
+        public async Task<ResultDto> Error()
         {
-            if (_Object.IsEmpty(json["info"]))
-                return null;
-
-            var key = _Xp.GetAesKey();
-            var userId = _Str.AesDecode(json["info"].ToString(), key, key);
-            var token = new JwtSecurityToken(
-                claims: new[]
-                {
-                    new Claim(ClaimTypes.Name, userId),
-                },
-                expires: DateTime.Now.AddMinutes(60),
-                signingCredentials: new SigningCredentials(
-                    _Xp.GetJwtKey(),
-                    SecurityAlgorithms.HmacSha256
-                )
-            );
-
-            return Ok(new JwtSecurityTokenHandler().WriteToken(token));
-        }
-
-        [Authorize]
-        [HttpPost("Home/AfterLogin")]
-        public string AfterLogin()
-        {
-            return "After Login";
+            var msg = HttpContext.Features.Get<IExceptionHandlerFeature>()
+                .Error.Message;
+            await _Log.ErrorAsync(msg);
+            return new ResultDto()
+            {
+                ErrorMsg = _Fun.IsDev 
+                    ? msg : _Fun.SystemError,
+            };
         }
 
     }//class

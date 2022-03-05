@@ -10,12 +10,12 @@ namespace BaoApi.Services
         private readonly ReadDto readDto = new()
         {
             ReadSql = $@"
-select Checked=0, b.IsMove, b.GiftType, 
+select b.IsMove, b.IsBatch, b.IsMoney, 
     b.StartTime, Corp=c.Name,
     b.Id, b.Name
 from dbo.Bao b
 join dbo.UserCust c on b.Creator=c.Id
-join dbo.Attend a on b.Id=a.BaoId
+join dbo.BaoAttend a on b.Id=a.BaoId
 where a.UserId='{_Fun.UserId()}'
 order by a.Created desc
 ",

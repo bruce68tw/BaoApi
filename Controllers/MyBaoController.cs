@@ -1,27 +1,26 @@
 ﻿using BaoApi.Services;
 using Base.Models;
-using Base.Services;
 using BaseApi.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Threading.Tasks;
 
 namespace BaoApi.Controllers
 {
     [Authorize]
     [ApiController]
+    [Route("[controller]/[action]")]
     public class MyBaoController : ApiCtrl
     {
-        [HttpPost("MyBao/GetPage")]
-        public async Task<ContentResult> GetPage(EasyDtDto dt)
+        [HttpPost]
+        public async Task<ContentResult> GetPage([BindRequired] EasyDtDto dt)
         {
             return JsonToCnt(await new MyBaoRead().GetPageAsync(dt));
         }
 
         /*
-        [HttpPost("MyBao/GetDetail")]
+        [HttpPost]
         public ContentResult GetDetail(JObject json)
         {
             var sql = @"
@@ -30,7 +29,7 @@ select b.*,
     u.IsCorp,
     JoinCount=(
 		select count(*) 
-		from dbo.Attend
+		from dbo.BaoAttend
 		where BaoId=@Id
 	)
 from dbo.Bao b

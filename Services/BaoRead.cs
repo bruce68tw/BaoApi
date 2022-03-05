@@ -1,4 +1,4 @@
-﻿using Base.Enums;
+﻿using BaoLib.Enums;
 using Base.Models;
 using Base.Services;
 using Newtonsoft.Json.Linq;
@@ -10,13 +10,17 @@ namespace BaoApi.Services
     {
         private readonly ReadDto readDto = new()
         {
-            ReadSql = @"
-select Checked=0, b.IsMove, b.GiftType, 
+            ReadSql = $@"
+select b.IsMove, b.IsBatch, b.IsMoney, 
     b.StartTime, Corp=c.Name,
     b.Id, b.Name
 from dbo.Bao b
 join dbo.UserCust c on b.Creator=c.Id
-order by b.Id desc
+where b.StartTime < cast(getDate() as date)
+and b.EndTime > getdate()
+and b.Status=1
+and b.LaunchStatus='{LaunchStatusEstr.Yes}'
+order by b.StartTime desc
 ",
             /*
             Items = new QitemDto[] {
@@ -27,7 +31,22 @@ order by b.Id desc
 
         public async Task<JObject> GetPageAsync(EasyDtDto easyDto)
         {
-            return await new CrudRead().GetPageAsync(readDto, easyDto);
+            //1.get redis key: BaoList + query condition
+            var key = RedisTypeEstr.BaoList + _Str.Md5(_Model.ToJsonStr(easyDto));
+
+            //2.check redis has data or not
+            var value = await _Redis.GetStrAsync(key);
+
+            //3.return redis data if existed
+            if (value != null)
+                return _Str.ToJson(value);
+
+            //4.read db
+            var json = await new CrudRead().GetPageAsync(readDto, easyDto);
+
+            //5.write redis & return data
+            await _Redis.SetStrAsync(key, _Json.ToStr(json));
+            return json;
         }
 
     } //class

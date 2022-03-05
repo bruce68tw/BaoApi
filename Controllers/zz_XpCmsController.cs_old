@@ -1,13 +1,15 @@
-﻿using Base.Models;
+﻿using BaoApi.Services;
+using Base.Models;
 using BaseApi.Controllers;
-using BaoApi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace BaoApi.Controllers
 {
     //CMS base controller, abstract class
+    [ApiController]
+    [Route("[controller]/[action]")]
     abstract public class XpCmsController : ApiCtrl 
     {
         //public string ProgName;     //program name
@@ -15,8 +17,8 @@ namespace BaoApi.Controllers
         public string DirUpload;    //upload dir, no right slash
 
         //read rows with cmsType
-        [HttpPost("[controller]/[action]")]
-        public async Task<ContentResult> GetPage(DtDto dt)
+        [HttpPost]
+        public async Task<ContentResult> GetPage([BindRequired] DtDto dt)
         {
             return JsonToCnt(await new XpCmsRead(CmsType).GetPageAsync(Ctrl, dt));
         }
@@ -26,12 +28,18 @@ namespace BaoApi.Controllers
             return new XpCmsEdit(Ctrl);
         }
 
-        [HttpPost("[controller]/[action]")]
-        public async Task<ContentResult> GetViewJson(JObject json)
+        [HttpPost]
+        public async Task<ContentResult> GetViewJson([BindRequired] string id)
         {
-            var key = json["id"].ToString();
-            return JsonToCnt(await EditService().GetViewJsonAsync(key));
+            //var key = json["id"].ToString();
+            return JsonToCnt(await EditService().GetViewJsonAsync(id));
         }
+
+        public async Task<FileResult> ViewFile(string table, string fid, string key, string ext)
+        {
+            return await _Xp.ViewCmsTypeAsync(fid, key, ext, CmsType);
+        }
+
 
     }//class
 }
