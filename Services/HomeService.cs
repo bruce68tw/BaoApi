@@ -31,7 +31,7 @@ namespace BaoApi.Services
             );
 
             //get user attend BaoId list
-            var attends = await _Db.GetJsonsAsync($@"
+            var attends = await _Db.GetJsonsA($@"
 select BaoId, AttendStatus 
 from dbo.BaoAttend 
 where UserId='{userId}'

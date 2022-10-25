@@ -19,9 +19,9 @@ order by Id desc
 ",
         };
 
-        public async Task<JObject> GetPageAsync(EasyDtDto easyDto)
+        public async Task<JObject> GetPageA(EasyDtDto easyDto)
         {
-            return await new CrudRead().GetPageAsync(readDto, easyDto); ;
+            return await new CrudRead().GetPageA(readDto, easyDto); ;
         }
 
     } //class

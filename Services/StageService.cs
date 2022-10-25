@@ -54,7 +54,7 @@ and s.Sort+1=t.NowLevel
                 "BaoId", baoId,
                 "UserId", _Fun.UserId(),
             };
-            var rows = await _Db.GetModelsAsync<StageImageDto>(sql, args);
+            var rows = await _Db.GetModelsA<StageImageDto>(sql, args);
             if (rows == null)
                 return null;
 
@@ -113,7 +113,7 @@ values(@Id, @BaoId, @UserId, @Reply, @Created)
             };
 
             var db = new Db();
-            if (await db.ExecSqlAsync(sql, args) != 1)
+            if (await db.ExecSqlA(sql, args) != 1)
                 goto lab_exit;
 
             //read stage.Answer for compare
@@ -133,7 +133,7 @@ order by s.Sort
                 "BaoId", baoId,
                 "UserId", userId,
             };
-            var list = await db.GetStrsAsync(sql, args);
+            var list = await db.GetStrsA(sql, args);
             if (list == null)
                 goto lab_exit;
 
@@ -157,7 +157,7 @@ update dbo.BaoAttend set
 where BaoId=@BaoId
 and UserId=@UserId
 ";
-            await db.ExecSqlAsync(sql, args);
+            await db.ExecSqlA(sql, args);
             result = "1";
 
         lab_exit:

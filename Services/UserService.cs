@@ -13,7 +13,7 @@ namespace BaoApi.Services
         /// </summary>
         /// <param name="row"></param>
         /// <returns>Error Msg, RECOVER, ''</returns>
-        public async Task<string> CreateAsync(JObject row)
+        public async Task<string> CreateA(JObject row)
         {
             //check email existed
             //var row = _Str.ToJson(json["row"].ToString());
@@ -48,7 +48,7 @@ insert into dbo.UserApp(Id, Name, Phone, Email, Address,
                 "Created", now,
                 "Revised", now,
             };
-            if (await _Db.ExecSqlAsync(sql, args) == 0)
+            if (await _Db.ExecSqlA(sql, args) == 0)
                 return _Str.GetError("Create Failed.");
 
             //set authCode & send email
@@ -61,7 +61,7 @@ insert into dbo.UserApp(Id, Name, Phone, Email, Address,
         /// </summary>
         /// <param name="row"></param>
         /// <returns>error msg if any</returns>
-        public async Task<string> UpdateAsync(JObject row)
+        public async Task<string> UpdateA(JObject row)
         {
             var sql = @"
 update dbo.UserApp set
@@ -74,7 +74,7 @@ where Id=@Id";
                 "Address", row["Address"].ToString(),
                 "Id", _Fun.UserId(),
             };
-            return (await _Db.ExecSqlAsync(sql, args) == 1)
+            return (await _Db.ExecSqlA(sql, args) == 1)
                 ? ""
                 : _Fun.SystemError;
         }
@@ -113,7 +113,7 @@ update dbo.UserApp set
     Revised=@Revised
 where Id='{userId}'
 ";
-            await db.ExecSqlAsync(sql, new List<object>() { "Revised", now });
+            await db.ExecSqlA(sql, new List<object>() { "Revised", now });
 
             //return encoded userId
             return _Xp.Encode(userId);
@@ -137,7 +137,7 @@ where Id='{userId}'
         private async Task<JObject> GetUserByEmailAsync(string email, Db db)
         {
             var sql = "select * from dbo.UserApp where Email=@Email";
-            return await db.GetJsonAsync(sql, new List<object>() { "Email", email });
+            return await db.GetJsonA(sql, new List<object>() { "Email", email });
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ update dbo.UserApp set
     Revised=getdate()
 where Email=@Email
 ";
-            await db.ExecSqlAsync(sql, new List<object>() { "Email", email });
+            await db.ExecSqlA(sql, new List<object>() { "Email", email });
 
             //send email
             user["AuthCode"] = authCode;

@@ -13,7 +13,7 @@ namespace BaoApi.Services
         /// <returns>JObject</returns>
         public async Task<JObject> GetDetailAsync(string id)
         {
-            if (!await _Str.CheckKeyAsync(id))
+            if (!await _Str.CheckKeyA(id))
                 return null;
 
             //get from DB, cannot read BaoAttend here, coz Redis 
@@ -22,7 +22,7 @@ select *
 from dbo.Cms
 where Id='{id}'
 ";
-            return await _Db.GetJsonAsync(sql);
+            return await _Db.GetJsonA(sql);
         }
 
     } //class

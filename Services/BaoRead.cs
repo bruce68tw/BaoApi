@@ -29,23 +29,23 @@ order by b.StartTime desc
             */
         };
 
-        public async Task<JObject> GetPageAsync(EasyDtDto easyDto)
+        public async Task<JObject> GetPageA(EasyDtDto easyDto)
         {
             //1.get redis key: BaoList + query condition
             var key = RedisTypeEstr.BaoList + _Str.Md5(_Model.ToJsonStr(easyDto));
 
             //2.check redis has data or not
-            var value = await _Redis.GetStrAsync(key);
+            var value = await _Redis.GetStrA(key);
 
             //3.return redis data if existed
             if (value != null)
                 return _Str.ToJson(value);
 
             //4.read db
-            var json = await new CrudRead().GetPageAsync(readDto, easyDto);
+            var json = await new CrudRead().GetPageA(readDto, easyDto);
 
             //5.write redis & return data
-            await _Redis.SetStrAsync(key, _Json.ToStr(json));
+            await _Redis.SetStrA(key, _Json.ToStr(json));
             return json;
         }
 

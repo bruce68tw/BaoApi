@@ -71,7 +71,7 @@ namespace BaoApi.Services
         private static async Task<FileResult> ViewFileAsync(string dir, string fid, string key, string ext)
         {
             var path = $"{dir}{fid}_{key}.{ext}";
-            return await _WebFile.ViewFileAsync(path, $"{fid}.{ext}");
+            return await _WebFile.ViewFileA(path, $"{fid}.{ext}");
         }
 
         //send email for new user auth
@@ -81,9 +81,9 @@ namespace BaoApi.Services
             {
                 Subject = "新用戶認証信",
                 ToUsers = new() { user["Email"].ToString() },
-                Body = _Str.ReplaceJson(await _File.ToStrAsync(_Xp.DirTemplate + "EmailNewAuth.html"), user),
+                Body = _Str.ReplaceJson(await _File.ToStrA(_Xp.DirTemplate + "EmailNewAuth.html"), user),
             };
-            await _Email.SendByDtoAsync(email);
+            await _Email.SendByDtoA(email);
         }
 
         public static async Task EmailRecoverAsync(JObject user)
@@ -92,9 +92,9 @@ namespace BaoApi.Services
             {
                 Subject = "回復帳號認証信",
                 ToUsers = new() { user["Email"].ToString() },
-                Body = _Str.ReplaceJson(await _File.ToStrAsync(_Xp.DirTemplate + "EmailRecover.html"), user),
+                Body = _Str.ReplaceJson(await _File.ToStrA(_Xp.DirTemplate + "EmailRecover.html"), user),
             };
-            await _Email.SendByDtoAsync(email);
+            await _Email.SendByDtoA(email);
         }
         
     } //class

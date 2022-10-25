@@ -14,12 +14,12 @@ namespace BaoApi.Services
         /// <returns>JObject</returns>
         public async Task<JObject> GetDetailAsync(string id)
         {
-            if (!await _Str.CheckKeyAsync(id))
+            if (!await _Str.CheckKeyA(id))
                 return null;
 
             //get redis key: BaoDetail + baoId
             var key = RedisTypeEstr.BaoDetail + id;
-            var value = await _Redis.GetStrAsync(key);
+            var value = await _Redis.GetStrA(key);
             JObject row;
             if (value != null)
             {
@@ -36,10 +36,10 @@ from dbo.Bao b
 join dbo.UserCust u on b.Creator=u.Id
 where b.Id='{id}'
 ";
-                row = await _Db.GetJsonAsync(sql);
+                row = await _Db.GetJsonA(sql);
 
                 //write redis
-                await _Redis.SetStrAsync(key, _Json.ToStr(row));
+                await _Redis.SetStrA(key, _Json.ToStr(row));
             }
             if (row == null)
                 return null;

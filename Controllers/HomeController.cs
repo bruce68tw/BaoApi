@@ -30,7 +30,7 @@ namespace BaoApi.Controllers
         {
             var msg = HttpContext.Features.Get<IExceptionHandlerFeature>()
                 .Error.Message;
-            await _Log.ErrorAsync(msg);
+            await _Log.ErrorA(msg);
             return new ResultDto()
             {
                 ErrorMsg = _Fun.IsDev 

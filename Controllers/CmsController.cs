@@ -17,7 +17,7 @@ namespace BaoApi.Controllers
         [HttpPost]
         public async Task<ContentResult> GetPage([BindRequired] EasyDtDto dt)
         {
-            return JsonToCnt(await new CmsRead().GetPageAsync(dt));
+            return JsonToCnt(await new CmsRead().GetPageA(dt));
         }
 
         [HttpPost]
