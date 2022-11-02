@@ -23,7 +23,7 @@ namespace BaoApi.Controllers
         [HttpPost]
         public async Task<ContentResult> GetDetail([BindRequired] string id)
         {
-            return JsonToCnt(await new CmsService().GetDetailAsync(id));
+            return JsonToCnt(await new CmsService().GetDetailA(id));
         }
 
         [HttpPost]

@@ -37,13 +37,13 @@ namespace BaoApi.Controllers
         [HttpPost]
         public async Task<string> Auth([BindRequired] string data)
         {
-            return await new UserService().AuthAsync(data);
+            return await new UserService().AuthA(data);
         }
 
         [HttpPost]
         public async Task<string> EmailRecover([BindRequired] string email)
         {
-            return await new UserService().EmailRecoverAsync(email);
+            return await new UserService().EmailRecoverA(email);
         }
 
     }//class

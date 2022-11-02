@@ -22,7 +22,18 @@ namespace BaoApi.Controllers
         [HttpPost]
         public async Task<ContentResult> GetDetail([BindRequired] string id)
         {
-            return JsonToCnt(await new BaoService().GetDetailAsync(id));
+            return JsonToCnt(await new BaoService().GetDetailA(id));
+        }
+
+        /// <summary>
+        /// 參加活動
+        /// </summary>
+        /// <param name="baoId"></param>
+        /// <returns>0(活動未開始),1(成功加入),else(error msg)</returns>
+        [HttpPost]
+        public async Task<string> Attend(string baoId)
+        {
+            return await new BaoService().AttendA(baoId);
         }
 
     }//class

@@ -22,7 +22,7 @@ namespace BaoApi.Services
 
             var email = row["Email"].ToString().ToLower();
             await using var db = new Db();
-            var user = await GetUserByEmailAsync(email, db);
+            var user = await GetUserByEmailA(email, db);
             if (user != null)
                 return "RECOVER";   //for front side !!
 
@@ -53,7 +53,7 @@ insert into dbo.UserApp(Id, Name, Phone, Email, Address,
 
             //set authCode & send email
             user["AuthCode"] = authCode;
-            return await UpdateAndEmailAsync(user, true, db);
+            return await UpdateAndEmailA(user, true, db);
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ where Id=@Id";
         /// </summary>
         /// <param name="data">encoded(authCode,email)</param>
         /// <returns>encoded UserId/error msg</returns>
-        public async Task<string> AuthAsync(string data)
+        public async Task<string> AuthA(string data)
         {
             //check input
             var cols = _Xp.Decode(data).Split(',');
@@ -94,7 +94,7 @@ where Id=@Id";
             //check email existed
             await using var db = new Db();
             var email = cols[1].ToLower();
-            var user = await GetUserByEmailAsync(email, db);
+            var user = await GetUserByEmailA(email, db);
             if (user == null)
                 return _Str.GetError("Email not found.");
 
@@ -125,16 +125,16 @@ where Id='{userId}'
         /// </summary>
         /// <param name="email"></param>
         /// <returns>error msg if any</returns>
-        public async Task<string> EmailRecoverAsync(string email)
+        public async Task<string> EmailRecoverA(string email)
         {
             await using var db = new Db();
-            var user = await GetUserByEmailAsync(email, db);
+            var user = await GetUserByEmailA(email, db);
             return (user == null)
                 ? _Str.GetError("Email not found.")
-                : await UpdateAndEmailAsync(user, false, db);
+                : await UpdateAndEmailA(user, false, db);
         }
 
-        private async Task<JObject> GetUserByEmailAsync(string email, Db db)
+        private async Task<JObject> GetUserByEmailA(string email, Db db)
         {
             var sql = "select * from dbo.UserApp where Email=@Email";
             return await db.GetJsonA(sql, new List<object>() { "Email", email });
@@ -147,7 +147,7 @@ where Id='{userId}'
         /// <param name="isNew"></param>
         /// <param name="db"></param>
         /// <returns>error msg if any</returns>
-        private async Task<string> UpdateAndEmailAsync(JObject user, bool isNew, Db db)
+        private async Task<string> UpdateAndEmailA(JObject user, bool isNew, Db db)
         {
             //update UserApp
             var email = user["Email"].ToString();

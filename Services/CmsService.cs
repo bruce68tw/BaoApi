@@ -11,7 +11,7 @@ namespace BaoApi.Services
         /// </summary>
         /// <param name="id">cms Id</param>
         /// <returns>JObject</returns>
-        public async Task<JObject> GetDetailAsync(string id)
+        public async Task<JObject> GetDetailA(string id)
         {
             if (!await _Str.CheckKeyA(id))
                 return null;
@@ -20,9 +20,9 @@ namespace BaoApi.Services
             var sql = $@"
 select *
 from dbo.Cms
-where Id='{id}'
+where Id=@Id
 ";
-            return await _Db.GetJsonA(sql);
+            return await _Db.GetJsonA(sql, new() { "Id", id });
         }
 
     } //class

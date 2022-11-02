@@ -15,7 +15,7 @@ namespace BaoApi.Services
         /// </summary>
         /// <param name="encodeId">encoded userId</param>
         /// <returns>JObject</returns>
-        public async Task<JObject> LoginAsync(string encodeId)
+        public async Task<JObject> LoginA(string encodeId)
         {
             var userId = _Xp.Decode(encodeId);
             var token = new JwtSecurityToken(
@@ -34,8 +34,8 @@ namespace BaoApi.Services
             var attends = await _Db.GetJsonsA($@"
 select BaoId, AttendStatus 
 from dbo.BaoAttend 
-where UserId='{userId}'
-");
+where UserId=@UserId
+", new() { "UserId", userId });
 
             return new JObject()
             {

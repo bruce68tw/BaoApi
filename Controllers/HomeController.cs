@@ -21,7 +21,7 @@ namespace BaoApi.Controllers
         [HttpPost]
         public async Task<ContentResult> Login([BindRequired] string info)
         {
-            return JsonToCnt(await new HomeService().LoginAsync(info));
+            return JsonToCnt(await new HomeService().LoginA(info));
         }
 
         //register in Startup.cs

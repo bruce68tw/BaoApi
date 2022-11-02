@@ -4,6 +4,7 @@
     public class StageImageDto
     {
         public string Id { get; set; }
+        public int Sort { get; set; }
         public string FileName { get; set; }
         public string AppHint { get; set; }
     }
