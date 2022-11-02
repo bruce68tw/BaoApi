@@ -197,7 +197,7 @@ and a.UserId='{userId}'
             var result = "0";   //initial return value
             var userId = _Fun.UserId();
             var db = new Db();
-            await db.BeginTranA();
+            //await db.BeginTranA();
 
             if (!await AddReplyA(baoId, userId, reply, db))
                 goto lab_exit;
@@ -268,10 +268,12 @@ and UserId=@UserId
             */
 
         lab_exit:
+            /*
             if (result == "1")
                 await db.CommitA();
             else
                 await db.RollbackA();
+            */
 
             await db.DisposeAsync();
             return result;
