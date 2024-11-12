@@ -10,7 +10,7 @@ namespace BaoApi.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]/[action]")]
-    public class StageController : ApiCtrl
+    public class StageController : BaseCtrl
     {
         /// <summary>
         /// get batch stage images zip file
@@ -21,7 +21,7 @@ namespace BaoApi.Controllers
         public async Task<FileResult> GetBatchImage([BindRequired] string id)
         {
             var bytes = await new StageService().GetBatchImageA(id);
-            return File(bytes, "application/zip");
+            return File(bytes!, "application/zip");
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace BaoApi.Controllers
         public async Task<FileResult> GetStepImage([BindRequired] string id)
         {
             var bytes = await new StageService().GetStepImageA(id);
-            return File(bytes, "application/zip");
+            return File(bytes!, "application/zip");
         }
 
         /// <summary>

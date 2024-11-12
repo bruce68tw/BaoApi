@@ -11,7 +11,7 @@ namespace BaoApi.Services
 {
     public class StageService
     {
-        public async Task<byte[]> GetBatchImageA(string baoId)
+        public async Task<byte[]?> GetBatchImageA(string baoId)
         {
             //get baoStage list
             var sql = @"
@@ -34,7 +34,7 @@ order by s.Sort
         /// </summary>
         /// <param name="baoId"></param>
         /// <returns></returns>
-        public async Task<byte[]> GetStepImageA(string baoId)
+        public async Task<byte[]?> GetStepImageA(string baoId)
         {
             //get one baoStage
             var sql = @"
@@ -54,7 +54,7 @@ and s.Sort+1=t.NowLevel
         /// <param name="sql">sql for read BaoStage</param>
         /// <param name="rows">BaoStage rows</param>
         /// <returns></returns>
-        private async Task<byte[]> GetZipImageA(string sql, string baoId)
+        private async Task<byte[]?> GetZipImageA(string sql, string baoId)
         {
             //1.read BaoStage table
             var args = new List<object>() {
@@ -62,8 +62,7 @@ and s.Sort+1=t.NowLevel
                 "UserId", _Fun.UserId(),
             };
             var rows = await _Db.GetModelsA<StageImageDto>(sql, args);
-            if (rows == null)
-                return null;
+            if (rows == null) return null;
 
             //2.create zip file in stream (simple syntax)
             using var ms = new MemoryStream();
@@ -81,12 +80,11 @@ and s.Sort+1=t.NowLevel
                     //3.如果檔案不存在則檔名前面加00
                     if (!File.Exists(path))
                     {
-                        path = _Xp.NoImagePath;
+                        path = _Fun.NoImagePath;
                         preZero = "00";
                     }
                     var hint = row.AppHint.Trim();
-                    if (hint != "")
-                        rowId += "_" + hint;
+                    if (hint != "") rowId += "_" + hint;
 
                     //4.寫入 zip, ex: 1_xxx_.png
                     zip.CreateEntryFromFile(path, $"{sort + 1}_{preZero}{rowId}_{ext}");
@@ -153,16 +151,16 @@ join dbo.Bao b on a.BaoId=b.Id
 where s.BaoId=@BaoId
 and a.UserId='{userId}'
 ";
-            var json = await db.GetJsonA(sql, new() { "BaoId", baoId });
+            var json = await db.GetRowA(sql, new() { "BaoId", baoId });
             if (json == null)
                 goto lab_exit;
 
             //write user reply first
-            if (!await AddReplyA(json["StageId"].ToString(), userId, reply, db))
+            if (!await AddReplyA(json["StageId"]!.ToString(), userId, reply, db))
                 goto lab_exit;
 
             //compare reply & answer
-            if (json["Answer"].ToString() != _Str.Md5(reply.Trim()))
+            if (json["Answer"]!.ToString() != _Str.Md5(reply.Trim()))
                 goto lab_exit;
 
             //如果為最後一關, 則設定為答題成功, 否則update BaoAttend.NowLevel(base 1)

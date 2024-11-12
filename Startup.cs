@@ -1,6 +1,7 @@
 ﻿using BaoApi.Models;
 using BaoApi.Services;
 using Base.Enums;
+using Base.Interfaces;
 using Base.Models;
 using Base.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -46,7 +47,7 @@ namespace BaoApi
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             //4.user info for base component
-            services.AddSingleton<IBaseUserService, MyBaseUserService>();
+            services.AddSingleton<IBaseUserSvc, MyBaseUserService>();
 
             //5.ado.net for mssql
             services.AddTransient<DbConnection, SqlConnection>();
@@ -68,12 +69,12 @@ namespace BaoApi
                 .AddJwtBearer(opts => {
                     opts.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
                         ValidateLifetime = true,  //是否驗證超時  當設置exp和nbf時有效 
                         ValidateIssuerSigningKey = true,  //是否驗證密鑰
                         IssuerSigningKey = _Xp.GetJwtKey(),     //SecurityKey
 
+                        //ValidateIssuer = false,
+                        //ValidateAudience = false,
                         //ValidAudience = "http://localhost:49999",//Audience
                         //ValidIssuer = "http://localhost:49998",//Issuer，這兩項和登入時頒發的一致
                         //緩衝過期時間，總的有效時間等於這個時間加上jwt的過期時間，預設為5分鐘                                                                                                            //注意這是緩衝過期時間，總的有效時間等於這個時間加上jwt的過期時間，如果不配置，默認是5分鐘

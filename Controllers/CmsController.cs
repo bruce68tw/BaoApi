@@ -12,7 +12,7 @@ namespace BaoApi.Controllers
     //[Authorize]
     [ApiController]
     [Route("[controller]/[action]")]
-    public class CmsController : ApiCtrl
+    public class CmsController : BaseCtrl
     {
         [HttpPost]
         public async Task<ContentResult> GetPage([BindRequired] EasyDtDto dt)
@@ -27,7 +27,7 @@ namespace BaoApi.Controllers
         }
 
         [HttpPost]
-        public async Task<FileResult> ViewFile(string id, string ext)
+        public async Task<FileResult?> ViewFile(string id, string ext)
         {
             return await _Xp.ViewCmsTypeAsync("FileName", id, ext, CmsTypeEstr.Card);
         }

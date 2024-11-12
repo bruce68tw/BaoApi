@@ -11,7 +11,7 @@ namespace BaoApi.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]/[action]")]
-    public class BaoController : ApiCtrl
+    public class BaoController : BaseCtrl
     {
         [HttpPost]
         public async Task<ContentResult> GetPage([BindRequired] EasyDtDto dt)

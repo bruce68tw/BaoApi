@@ -11,7 +11,7 @@ namespace BaoApi.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class HomeController : ApiCtrl
+    public class HomeController : BaseCtrl
     {
         /// <summary>
         /// login and get token
@@ -26,15 +26,14 @@ namespace BaoApi.Controllers
 
         //register in Startup.cs
         [HttpGet]
-        public async Task<ResultDto> Error()
+        public ResultDto Error()
         {
-            var msg = HttpContext.Features.Get<IExceptionHandlerFeature>()
+            var msg = HttpContext.Features.Get<IExceptionHandlerFeature>()!
                 .Error.Message;
-            await _Log.ErrorA(msg);
+            _Log.Error(msg);
             return new ResultDto()
             {
-                ErrorMsg = _Fun.IsDev 
-                    ? msg : _Fun.SystemError,
+                ErrorMsg = _Fun.IsDev ? msg : _Fun.SystemError,
             };
         }
 

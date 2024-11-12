@@ -16,15 +16,15 @@ namespace BaoApi.Services
         /// </summary>
         /// <param name="id">bao Id</param>
         /// <returns>JObject</returns>
-        public async Task<JObject> GetDetailA(string id)
+        public async Task<JObject?> GetDetailA(string id)
         {
-            if (!await _Str.CheckKeyA(id))
-                return null;
+            if (!_Str.CheckKey(id)) return null;
 
             //get redis key: BaoDetail + baoId
+            var userId = _Fun.UserId();
             var key = RedisTypeEstr.BaoDetail + id;
-            var value = await _Redis.GetStrA(key);
-            JObject row;
+            var value = _Cache.GetStr(userId, key);
+            JObject? row;
             if (value != null)
             {
                 row = _Str.ToJson(value);
@@ -40,19 +40,18 @@ from dbo.Bao b
 join dbo.UserCust u on b.Creator=u.Id
 where b.Id=@Id
 ";
-                row = await _Db.GetJsonA(sql, new() { "Id", id });
+                row = await _Db.GetRowA(sql, new() { "Id", id });
 
                 //write redis
-                await _Redis.SetStrA(key, _Json.ToStr(row));
+                if (row != null) _Cache.SetStr(userId, key, _Json.ToStr(row));
             }
-            if (row == null)
-                return null;
+            if (row == null) return null;
 
             //re-set Status field if need
-            if (row["Status"].ToString() == "1")
+            if (row["Status"]!.ToString() == "1")
             { 
                 //set status=0 if cancel attend or not between start/end
-                if (!_Date.IsNowInRange(row["StartTime"].ToString(), row["EndTime"].ToString()))
+                if (!_Date.IsNowInRange(row["StartTime"]!.ToString(), row["EndTime"]!.ToString()))
                     row["Status"] = 0;
             }
             return row;
@@ -68,22 +67,19 @@ where b.Id=@Id
             //get Bao row
             var args = new List<object>() { "Id", baoId };
             var db = new Db();
-            var row = await db.GetJsonA("select * from dbo.Bao where Id=@Id and Status=1", args);
-            if (row == null)
-                return "找不到這一筆尋寶資料。";
+            var row = await db.GetRowA("select * from dbo.Bao where Id=@Id and Status=1", args);
+            if (row == null) return "找不到這一筆尋寶資料。";
 
             //check start/end time
             var now = DateTime.Now;
-            var startTime = _Date.CsToDt(row["StartTime"].ToString());
-            var endTime = _Date.CsToDt(row["EndTime"].ToString());
-            if (now > endTime)
-                return "活動已經過期，無法參加。";
+            var startTime = _Date.CsToDt(row["StartTime"]!.ToString());
+            var endTime = _Date.CsToDt(row["EndTime"]!.ToString());
+            if (now > endTime) return "活動已經過期，無法參加。";
 
             //check BaoAttend existed
             var userId = _Fun.UserId();
-            row = await db.GetJsonA($"select UserId from dbo.BaoAttend where UserId='{userId}' and BaoId=@Id", args);
-            if (row != null)
-                return "您已經參加這個活動，無法再參加。";
+            row = await db.GetRowA($"select UserId from dbo.BaoAttend where UserId='{userId}' and BaoId=@Id", args);
+            if (row != null) return "您已經參加這個活動，無法再參加。";
 
             //insert BaoAttend
             var sql = @$"
@@ -93,11 +89,10 @@ insert into dbo.BaoAttend(UserId, BaoId, AttendStatus, NowLevel, Created) values
             var rowCount = await db.ExecSqlA(sql, args);
             await db.DisposeAsync();
 
-            if (rowCount != 1)
-                return "系統發生錯誤，無法參加。";
+            if (rowCount != 1) return "系統發生錯誤，無法參加。";
 
             //活動是否開始
-            return _Date.IsNowInRange(startTime.Value, endTime.Value)
+            return _Date.IsNowInRange(startTime!.Value, endTime!.Value)
                 ? "1" : "0";
         }
 

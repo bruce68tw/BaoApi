@@ -21,10 +21,10 @@ namespace BaoApi.Services
         public const string CmsMsg = "M";
 
         //from config file
-        public static XpConfigDto Config;
+        public static XpConfigDto Config = null!;
 
         //dir path
-        public static string NoImagePath = _Fun.DirRoot + "_image/noImage.jpg";
+        //public static string NoImagePath = _Fun.DirRoot + "_image/noImage.jpg";
         public static string DirTemplate = _Fun.Dir("_template");
         //public static string DirStageImage = Config.DirStageImage;
         //public static string DirCms = Config.DirCms;
@@ -50,12 +50,12 @@ namespace BaoApi.Services
 
         public static string Encode(string data)
         {
-            return _Str.AesEncode(data, _aesKey16, _aesKey16);
+            return _Str.AesEncode(data, _aesKey16);
         }
 
         public static string Decode(string data)
         {
-            return _Str.AesDecode(data, _aesKey16, _aesKey16);
+            return _Str.AesDecode(data, _aesKey16);
         }
 
         public static SymmetricSecurityKey GetJwtKey()
@@ -63,15 +63,15 @@ namespace BaoApi.Services
             return _jwtKey16;
         }
 
-        public static async Task<FileResult> ViewCmsTypeAsync(string fid, string key, string ext, string cmsType)
+        public static async Task<FileResult?> ViewCmsTypeAsync(string fid, string key, string ext, string cmsType)
         {
             return await ViewFileAsync(DirCmsType(cmsType), fid, key, ext);
         }
 
-        private static async Task<FileResult> ViewFileAsync(string dir, string fid, string key, string ext)
+        private static async Task<FileResult?> ViewFileAsync(string dir, string fid, string key, string ext)
         {
             var path = $"{dir}{fid}_{key}.{ext}";
-            return await _WebFile.ViewFileA(path, $"{fid}.{ext}");
+            return await _HttpFile.ViewFileA(path, $"{fid}.{ext}");
         }
 
         //send email for new user auth
@@ -80,8 +80,8 @@ namespace BaoApi.Services
             var email = new EmailDto()
             {
                 Subject = "新用戶認証信",
-                ToUsers = new() { user["Email"].ToString() },
-                Body = _Str.ReplaceJson(await _File.ToStrA(_Xp.DirTemplate + "EmailNewAuth.html"), user),
+                ToUsers = new() { user["Email"]!.ToString() },
+                Body = _Str.ReplaceJson(await _File.ToStrA(_Xp.DirTemplate + "EmailNewAuth.html") ?? "", user),
             };
             await _Email.SendByDtoA(email);
         }
@@ -91,8 +91,8 @@ namespace BaoApi.Services
             var email = new EmailDto()
             {
                 Subject = "回復帳號認証信",
-                ToUsers = new() { user["Email"].ToString() },
-                Body = _Str.ReplaceJson(await _File.ToStrA(_Xp.DirTemplate + "EmailRecover.html"), user),
+                ToUsers = new() { user["Email"]!.ToString() },
+                Body = _Str.ReplaceJson(await _File.ToStrA(_Xp.DirTemplate + "EmailRecover.html") ?? "", user),
             };
             await _Email.SendByDtoA(email);
         }

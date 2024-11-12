@@ -1,5 +1,5 @@
 ﻿using Base.Models;
-using Base.Services;
+using Base.Interfaces;
 using BaseApi.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace BaoApi.Services
 {
-    public class MyBaseUserService : IBaseUserService
+    public class MyBaseUserService : IBaseUserSvc
     {
         //get base user info
         public BaseUserDto GetData()

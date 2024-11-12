@@ -7,7 +7,7 @@ namespace BaoApi.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class TestArgController : ApiCtrl
+    public class TestArgController : BaseCtrl
     {
 
         [HttpPost]

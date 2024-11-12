@@ -13,7 +13,7 @@ namespace BaoApi.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class TestJwtController : ApiCtrl
+    public class TestJwtController : BaseCtrl
     {
         /// <summary>
         /// login and get token

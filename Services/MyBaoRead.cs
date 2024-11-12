@@ -21,9 +21,9 @@ order by a.Created desc
 ",
         };
 
-        public async Task<JObject> GetPageA(EasyDtDto easyDto)
+        public async Task<JObject?> GetPageA(EasyDtDto easyDto)
         {
-            return await new CrudRead().GetPageA(readDto, easyDto);
+            return await new CrudReadSvc().GetPageA(readDto, easyDto);
         }
 
     } //class

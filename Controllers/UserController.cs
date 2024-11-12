@@ -11,7 +11,7 @@ namespace BaoApi.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
-    public class UserController : ApiCtrl
+    public class UserController : BaseCtrl
     {
         [HttpPost]
         public async Task<string> Create([BindRequired] JObject row)
@@ -29,7 +29,7 @@ namespace BaoApi.Controllers
         public async Task<ContentResult> GetRow([BindRequired] string id)
         {
             var sql = "select * from dbo.UserApp where Id=@Id";
-            var row = await _Db.GetJsonA(sql, new List<object>() { "Id", _Xp.Decode(id) });
+            var row = await _Db.GetRowA(sql, new List<object>() { "Id", _Xp.Decode(id) });
             return JsonToCnt(row); ;
         }
 

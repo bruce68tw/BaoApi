@@ -20,11 +20,10 @@ namespace BaoApi.Services
             if (row["Email"] == null)
                 return _Str.GetError("Email can not Empty.");
 
-            var email = row["Email"].ToString().ToLower();
+            var email = row["Email"]!.ToString().ToLower();
             await using var db = new Db();
             var user = await GetUserByEmailA(email, db);
-            if (user != null)
-                return "RECOVER";   //for front side !!
+            if (user != null) return "RECOVER";   //for front side !!
 
             //create new account
             var sql = @"
@@ -39,10 +38,10 @@ insert into dbo.UserApp(Id, Name, Phone, Email, Address,
             var args = new List<object>()
             {
                 "Id", newId,
-                "Name", row["Name"].ToString(),
-                "Phone", row["Phone"].ToString(),
+                "Name", row["Name"]!.ToString(),
+                "Phone", row["Phone"]!.ToString(),
                 "Email", email,
-                "Address", row["Address"].ToString(),
+                "Address", row["Address"]!.ToString(),
                 "AuthCode", authCode,
                 "Status", 0,
                 "Created", now,
@@ -52,7 +51,7 @@ insert into dbo.UserApp(Id, Name, Phone, Email, Address,
                 return _Str.GetError("Create Failed.");
 
             //set authCode & send email
-            user["AuthCode"] = authCode;
+            user!["AuthCode"] = authCode;
             return await UpdateAndEmailA(user, true, db);
         }
 
@@ -70,13 +69,12 @@ update dbo.UserApp set
 where Id=@Id";
             var args = new List<object>()
             {
-                "Name", row["Name"].ToString(),
-                "Address", row["Address"].ToString(),
+                "Name", row["Name"]!.ToString(),
+                "Address", row["Address"]!.ToString(),
                 "Id", _Fun.UserId(),
             };
             return (await _Db.ExecSqlA(sql, args) == 1)
-                ? ""
-                : _Fun.SystemError;
+                ? "" : _Fun.SystemError;
         }
 
         /// <summary>
@@ -100,13 +98,13 @@ where Id=@Id";
 
             //check authCode & revised time
             var now = DateTime.Now;
-            if (cols[0] != user["AuthCode"].ToString())
+            if (cols[0] != user["AuthCode"]!.ToString())
                 return _Str.GetError("認証碼輸入錯誤。");
             else if (_Date.MinDiff(Convert.ToDateTime(user["Revised"]), now) > 10)
                 return _Str.GetError("認証碼已經失效。");
 
             //update UserApp.Status
-            var userId = user["Id"].ToString();
+            var userId = user["Id"]!.ToString();
             var sql = $@"
 update dbo.UserApp set
     Status=1,
@@ -134,10 +132,10 @@ where Id='{userId}'
                 : await UpdateAndEmailA(user, false, db);
         }
 
-        private async Task<JObject> GetUserByEmailA(string email, Db db)
+        private async Task<JObject?> GetUserByEmailA(string email, Db db)
         {
             var sql = "select * from dbo.UserApp where Email=@Email";
-            return await db.GetJsonA(sql, new List<object>() { "Email", email });
+            return await db.GetRowA(sql, new List<object>() { "Email", email });
         }
 
         /// <summary>
@@ -150,7 +148,7 @@ where Id='{userId}'
         private async Task<string> UpdateAndEmailA(JObject user, bool isNew, Db db)
         {
             //update UserApp
-            var email = user["Email"].ToString();
+            var email = user["Email"]!.ToString();
             var authCode = _Str.RandomStr(5, 1);
             var sql = $@"
 update dbo.UserApp set
