@@ -12,6 +12,8 @@ namespace BaoApi.Services
         //get base user info
         public BaseUserDto GetData()
         {
+            return _Http.JwtToBr();
+            /*
             var authStr = _Http.GetRequest().Headers["Authorization"]
                 .ToString().Replace("Bearer ", "");
             var token = new JwtSecurityTokenHandler().ReadJwtToken(authStr);
@@ -20,6 +22,7 @@ namespace BaoApi.Services
             {
                 UserId = userId,
             };
+            */
         }
     }
 }

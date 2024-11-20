@@ -22,6 +22,7 @@
     <None Remove="Controllers\zz_CmsMsgController.cs_old" />
     <None Remove="Controllers\zz_XpCmsController.cs_old" />
     <None Remove="Services\CmsMsgRead.cs_old" />
+    <None Remove="Services\HomeService.cs_old" />
     <None Remove="Services\zz_XpCmsEdit.cs_old" />
     <None Remove="Services\zz_XpCmsRead.cs_old" />
     <None Remove="_image\noImage.jpg" />

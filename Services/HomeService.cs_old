@@ -19,10 +19,10 @@ namespace BaoApi.Services
         {
             var userId = _Xp.Decode(encodeId);
             var token = new JwtSecurityToken(
-                claims: new[]
-                {
+                claims:
+                [
                     new Claim(ClaimTypes.Name, userId),
-                },
+                ],
                 signingCredentials: new SigningCredentials(
                     _Xp.GetJwtKey(),
                     SecurityAlgorithms.HmacSha256
@@ -35,7 +35,7 @@ namespace BaoApi.Services
 select BaoId, AttendStatus 
 from dbo.BaoAttend 
 where UserId=@UserId
-", new() { "UserId", userId });
+", ["UserId", userId]);
 
             return new JObject()
             {
