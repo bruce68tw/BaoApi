@@ -81,11 +81,12 @@ where Id=@Id";
         /// 比對認証碼 for new user or recover
         /// </summary>
         /// <param name="data">encoded(authCode,email)</param>
-        /// <returns>encoded UserId/error msg</returns>
+        /// <returns>userId/error msg</returns>
         public async Task<string> AuthA(string data)
         {
             //check input
-            var cols = _Xp.Decode(data).Split(',');
+            //var cols = _Xp.Decode(data).Split(',');
+            var cols = data.Split(',');
             if (cols.Length != 2)
                 return _Str.GetError("Input Wrong.");
 
@@ -114,8 +115,8 @@ where Id='{userId}'
             await db.ExecSqlA(sql, new List<object>() { "Revised", now });
 
             //return encoded userId
-            return _Xp.Encode(userId);
-            
+            //return _Xp.Encode(userId);
+            return userId;
         }
 
         /// <summary>
