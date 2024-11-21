@@ -1,4 +1,6 @@
-﻿using Base.Services;
+﻿using BaoApi.Models;
+using Base.Services;
+using BaseApi.Services;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -25,6 +27,16 @@ namespace BaoApi.Services
             var user = await GetUserByEmailA(email, db);
             if (user != null) return "RECOVER";   //for front side !!
 
+            var user2 = new UserAppDto()
+            {
+                AuthCode = _Str.RandomStr(5, 1),
+                Email = email,
+                Name = row["Name"]!.ToString(),
+                Phone = row["Phone"]!.ToString(),
+                Ip = _Http.GetIp(),
+                Address = row["Address"]!.ToString(),
+            };
+
             //create new account
             var sql = @"
 insert into dbo.UserApp(Id, Name, Phone, Email, Address, 
@@ -34,25 +46,25 @@ insert into dbo.UserApp(Id, Name, Phone, Email, Address,
 
             var newId = _Str.NewId();
             var now = DateTime.Now;
-            var authCode = _Str.RandomStr(5, 1);
+            //var authCode = _Str.RandomStr(5, 1);
             var args = new List<object>()
             {
                 "Id", newId,
-                "Name", row["Name"]!.ToString(),
-                "Phone", row["Phone"]!.ToString(),
+                "Name", user2.Name,
+                "Phone", user2.Phone,
                 "Email", email,
-                "Address", row["Address"]!.ToString(),
-                "AuthCode", authCode,
-                "Status", 0,
+                "Ip", user2.Ip,
+                "Address", user2.Address,
+                "AuthCode", user2.AuthCode,
+                "Status", 0,    //initial 0 表停用
                 "Created", now,
                 "Revised", now,
             };
             if (await _Db.ExecSqlA(sql, args) == 0)
                 return _Str.GetError("Create Failed.");
 
-            //set authCode & send email
-            user!["AuthCode"] = authCode;
-            return await UpdateAndEmailA(user, true, db);
+            //新增成功, set authCode & send email
+            return await UpdateAndEmailA(user2, true, db);
         }
 
         /// <summary>
@@ -82,41 +94,41 @@ where Id=@Id";
         /// </summary>
         /// <param name="data">encoded(authCode,email)</param>
         /// <returns>userId/error msg</returns>
-        public async Task<string> AuthA(string data)
+        public async Task<JObject> AuthA(string data)
         {
             //check input
             //var cols = _Xp.Decode(data).Split(',');
             var cols = data.Split(',');
             if (cols.Length != 2)
-                return _Str.GetError("Input Wrong.");
+                return _Json.GetError("Input Wrong.");
 
             //check email existed
             await using var db = new Db();
             var email = cols[1].ToLower();
             var user = await GetUserByEmailA(email, db);
             if (user == null)
-                return _Str.GetError("Email not found.");
+                return _Json.GetError("Email not found.");
 
             //check authCode & revised time
             var now = DateTime.Now;
-            if (cols[0] != user["AuthCode"]!.ToString())
-                return _Str.GetError("認証碼輸入錯誤。");
-            else if (_Date.MinDiff(Convert.ToDateTime(user["Revised"]), now) > 10)
-                return _Str.GetError("認証碼已經失效。");
+            if (cols[0] != user.AuthCode)
+                return _Json.GetError("認証碼輸入錯誤。");
+            else if (_Date.MinDiff(user.Revised, now) > 10)
+                return _Json.GetError("認証碼已經失效。");
 
             //update UserApp.Status
-            var userId = user["Id"]!.ToString();
+            //var userId = user.Id;
             var sql = $@"
 update dbo.UserApp set
     Status=1,
     Revised=@Revised
-where Id='{userId}'
+where Id='{user.Id}'
 ";
-            await db.ExecSqlA(sql, new List<object>() { "Revised", now });
+            await db.ExecSqlA(sql, ["Revised", now]);
 
             //return encoded userId
             //return _Xp.Encode(userId);
-            return userId;
+            return _Xp.GetUidAndToken(user.Id);
         }
 
         /// <summary>
@@ -133,10 +145,10 @@ where Id='{userId}'
                 : await UpdateAndEmailA(user, false, db);
         }
 
-        private async Task<JObject?> GetUserByEmailA(string email, Db db)
+        private async Task<UserAppDto?> GetUserByEmailA(string email, Db db)
         {
             var sql = "select * from dbo.UserApp where Email=@Email";
-            return await db.GetRowA(sql, new List<object>() { "Email", email });
+            return await db.GetModelA<UserAppDto>(sql, ["Email", email]);
         }
 
         /// <summary>
@@ -146,25 +158,25 @@ where Id='{userId}'
         /// <param name="isNew"></param>
         /// <param name="db"></param>
         /// <returns>error msg if any</returns>
-        private async Task<string> UpdateAndEmailA(JObject user, bool isNew, Db db)
+        private async Task<string> UpdateAndEmailA(UserAppDto user, bool isNew, Db db)
         {
             //update UserApp
-            var email = user["Email"]!.ToString();
-            var authCode = _Str.RandomStr(5, 1);
+            //var email = user["Email"]!.ToString();
+            //var authCode = _Str.RandomStr(5, 1);
             var sql = $@"
 update dbo.UserApp set
-    AuthCode='{authCode}',
+    AuthCode='{user.AuthCode}',
     Revised=getdate()
 where Email=@Email
 ";
-            await db.ExecSqlA(sql, new List<object>() { "Email", email });
+            await db.ExecSqlA(sql, ["Email", user.Email]);
 
             //send email
-            user["AuthCode"] = authCode;
+            //user["AuthCode"] = authCode;
             if (isNew)
-                await _Xp.EmailNewAuthAsync(user);
+                await _Xp.EmailNewAuthA(user);
             else
-                await _Xp.EmailRecoverAsync(user);
+                await _Xp.EmailRecoverA(user);
 
             return "";
         }

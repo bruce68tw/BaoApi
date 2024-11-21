@@ -29,7 +29,7 @@ namespace BaoApi.Controllers
         [HttpPost]
         public async Task<FileResult?> ViewFile(string id, string ext)
         {
-            return await _Xp.ViewCmsTypeAsync("FileName", id, ext, CmsTypeEstr.Card);
+            return await _Xp.ViewCmsTypeA("FileName", id, ext, CmsTypeEstr.Card);
         }
 
     }//class

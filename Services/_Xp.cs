@@ -2,6 +2,7 @@
 using Base.Models;
 using Base.Services;
 using BaseApi.Services;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BaoApi.Services
 {
-    #pragma warning disable CA2211 // 非常數欄位不應可見
+#pragma warning disable CA2211 // 非常數欄位不應可見
     public static class _Xp
     {
         //AES & JWT key
@@ -63,40 +64,53 @@ namespace BaoApi.Services
             return _jwtKey16;
         }
 
-        public static async Task<FileResult?> ViewCmsTypeAsync(string fid, string key, string ext, string cmsType)
+        public static async Task<FileResult?> ViewCmsTypeA(string fid, string key, string ext, string cmsType)
         {
-            return await ViewFileAsync(DirCmsType(cmsType), fid, key, ext);
+            return await ViewFileA(DirCmsType(cmsType), fid, key, ext);
         }
 
-        private static async Task<FileResult?> ViewFileAsync(string dir, string fid, string key, string ext)
+        private static async Task<FileResult?> ViewFileA(string dir, string fid, string key, string ext)
         {
             var path = $"{dir}{fid}_{key}.{ext}";
             return await _HttpFile.ViewFileA(path, $"{fid}.{ext}");
         }
 
         //send email for new user auth
-        public static async Task EmailNewAuthAsync(JObject user)
+        public static async Task EmailNewAuthA(UserAppDto user)
         {
             var email = new EmailDto()
             {
                 Subject = "新用戶認証信",
-                ToUsers = new() { user["Email"]!.ToString() },
-                Body = _Str.ReplaceJson(await _File.ToStrA(_Xp.DirTemplate + "EmailNewAuth.html") ?? "", user),
+                ToUsers = [user.Email],
+                Body = _Str.ReplaceJson(await _File.ToStrA(_Xp.DirTemplate + "EmailNewAuth.html") ?? "", _Model.ToJson(user)),
             };
             await _Email.SendByDtoA(email);
         }
 
-        public static async Task EmailRecoverAsync(JObject user)
+        public static async Task EmailRecoverA(UserAppDto user)
         {
             var email = new EmailDto()
             {
                 Subject = "回復帳號認証信",
-                ToUsers = new() { user["Email"]!.ToString() },
-                Body = _Str.ReplaceJson(await _File.ToStrA(_Xp.DirTemplate + "EmailRecover.html") ?? "", user),
+                ToUsers = [user.Email],
+                Body = _Str.ReplaceJson(await _File.ToStrA(_Xp.DirTemplate + "EmailRecover.html") ?? "", _Model.ToJson(user)),
             };
             await _Email.SendByDtoA(email);
         }
         
+        /// <summary>
+        /// get userId and jwt token
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public static JObject GetUidAndToken(string userId)
+        {
+            return new JObject()
+            {
+                ["userId"] = userId,
+                ["token"] = _Login.GetJwtStr(userId),
+            };
+        }
     } //class
     #pragma warning restore CA2211 // 非常數欄位不應可見
 }

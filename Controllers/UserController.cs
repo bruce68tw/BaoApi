@@ -33,11 +33,15 @@ namespace BaoApi.Controllers
             return JsonToCnt(row); ;
         }
 
-        //比對認証碼, called by: (1)new user, (2)recover
+        /// <summary>
+        /// 比對認証碼, called by: (1)new user, (2)recover
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         [HttpPost]
-        public async Task<string> Auth([BindRequired] string data)
+        public async Task<ContentResult> Auth([BindRequired] string data)
         {
-            return await new UserService().AuthA(data);
+            return JsonToCnt(await new UserService().AuthA(data));
         }
 
         [HttpPost]
