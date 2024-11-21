@@ -27,7 +27,7 @@ namespace BaoApi.Controllers
             JObject? result;
             if (status == 1)
             {
-                //get user attend BaoId list
+                //成功: get user attend BaoId list
                 var attends = await db.GetRowsA($@"
 select BaoId, AttendStatus 
 from dbo.BaoAttend 
