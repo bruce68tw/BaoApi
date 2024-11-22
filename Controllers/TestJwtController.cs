@@ -1,6 +1,6 @@
-﻿using BaoApi.Services;
-using Base.Services;
+﻿using Base.Services;
 using BaseApi.Controllers;
+using BaseApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -24,13 +24,13 @@ namespace BaoApi.Controllers
         public string Login([BindRequired] string userId)
         {
             var token = new JwtSecurityToken(
-                claims: new[]
-                {
+                claims:
+                [
                     new Claim(ClaimTypes.Name, userId),
-                },
-                expires: DateTime.Now.AddMinutes(60),
+                ],
+                expires: DateTime.Now.AddMinutes(_Fun.TimeOut),
                 signingCredentials: new SigningCredentials(
-                    _Xp.GetJwtKey(),
+                    _Login.GetJwtKey(),
                     SecurityAlgorithms.HmacSha256
                 )
             );

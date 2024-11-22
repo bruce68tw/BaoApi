@@ -23,15 +23,16 @@ namespace BaoApi.Services
             //get redis key: BaoDetail + baoId
             var userId = _Fun.UserId();
             var key = RedisTypeEstr.BaoDetail + id;
-            var value = _Cache.GetStr(userId, key);
+            //var value = _Cache.GetStr(userId, key);
             JObject? row;
+            /*
             if (value != null)
             {
                 row = _Str.ToJson(value);
             }
             else
             {
-
+            */
                 //get from DB, cannot read BaoAttend here, coz Redis 
                 var sql = $@"
 select b.*,
@@ -43,8 +44,8 @@ where b.Id=@Id
                 row = await _Db.GetRowA(sql, new() { "Id", id });
 
                 //write redis
-                if (row != null) _Cache.SetStr(userId, key, _Json.ToStr(row));
-            }
+                //if (row != null) _Cache.SetStr(userId, key, _Json.ToStr(row));
+            //}
             if (row == null) return null;
 
             //re-set Status field if need

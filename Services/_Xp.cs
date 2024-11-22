@@ -2,11 +2,8 @@
 using Base.Models;
 using Base.Services;
 using BaseApi.Services;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BaoApi.Services
@@ -16,7 +13,7 @@ namespace BaoApi.Services
     {
         //AES & JWT key
         private const string AesKey = "YourAesKey";
-        private const string JwtKey = "YourJwtKey";
+        //private const string JwtKey = "YourJwtKey";
 
         //cms type msg
         public const string CmsMsg = "M";
@@ -32,8 +29,8 @@ namespace BaoApi.Services
 
         //set value
         private static readonly string _aesKey16 = _Str.PreZero(16, AesKey, true);
-        private static readonly SymmetricSecurityKey _jwtKey16 =
-            new(Encoding.UTF8.GetBytes(_Str.PreZero(16, JwtKey, true)));
+        //private static readonly SymmetricSecurityKey _jwtKey16 =
+        //    new(Encoding.UTF8.GetBytes(_Str.PreZero(16, JwtKey, true)));
 
         public static string DirStageImage()
         {
@@ -49,6 +46,7 @@ namespace BaoApi.Services
             return DirCms() + cmsType + _Fun.DirSep;
         }
 
+        /*
         public static string Encode(string data)
         {
             return _Str.AesEncode(data, _aesKey16);
@@ -58,11 +56,14 @@ namespace BaoApi.Services
         {
             return _Str.AesDecode(data, _aesKey16);
         }
+        */
 
+        /*
         public static SymmetricSecurityKey GetJwtKey()
         {
             return _jwtKey16;
         }
+        */
 
         public static async Task<FileResult?> ViewCmsTypeA(string fid, string key, string ext, string cmsType)
         {
@@ -108,7 +109,7 @@ namespace BaoApi.Services
             return new JObject()
             {
                 ["userId"] = userId,
-                ["token"] = _Login.GetJwtStr(userId),
+                ["token"] = _Login.GetJwtAuthStr(userId),
             };
         }
     } //class

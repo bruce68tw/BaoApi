@@ -4,6 +4,7 @@ using BaseApi.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace BaoApi.Services
 {
@@ -12,7 +13,11 @@ namespace BaoApi.Services
         //get base user info
         public BaseUserDto GetData()
         {
-            return _Http.JwtToBr();
+            return new BaseUserDto()
+            {
+                UserId = _Http.JwtToUserId(),
+            };
+            //return _Http.JwtToBr();
             /*
             var authStr = _Http.GetRequest().Headers["Authorization"]
                 .ToString().Replace("Bearer ", "");

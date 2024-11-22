@@ -39,9 +39,9 @@ namespace BaoApi.Services
 
             //create new account
             var sql = @"
-insert into dbo.UserApp(Id, Name, Phone, Email, Address, 
+insert into dbo.UserApp(Id, Name, Phone, Email, Ip, Address, 
     AuthCode, Status, Created, Revised) values(
-@Id, @Name, @Phone, @Email, @Address, 
+@Id, @Name, @Phone, @Email, @Ip, @Address, 
     @AuthCode, @Status, @Created, @Revised)";
 
             var newId = _Str.NewId();

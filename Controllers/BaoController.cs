@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BaoApi.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("[controller]/[action]")]
     public class BaoController : BaseCtrl

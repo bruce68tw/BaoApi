@@ -36,7 +36,7 @@ where UserId=@UserId
 
                 result = new JObject()
                 {
-                    ["token"] = _Login.GetJwtStr(userId),
+                    ["token"] = _Login.GetJwtAuthStr(userId),
                     ["attends"] = attends,
                 };
             }

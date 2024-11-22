@@ -35,17 +35,19 @@ order by b.StartTime desc
             var userId = _Fun.UserId();
             var key = RedisTypeEstr.BaoList + _Str.Md5(_Model.ToJsonStr(easyDto));
 
+            /*
             //2.check redis has data or not
             var value = _Cache.GetStr(userId, key);
 
             //3.return redis data if existed
             if (value != null) return _Str.ToJson(value);
+            */
 
             //4.read db
             var json = await new CrudReadSvc().GetPageA(readDto, easyDto);
 
             //5.write redis & return data
-            if (json != null) _Cache.SetStr(userId, key, _Json.ToStr(json));
+            //if (json != null) _Cache.SetStr(userId, key, _Json.ToStr(json));
             return json;
         }
 
