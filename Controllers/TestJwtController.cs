@@ -4,10 +4,6 @@ using BaseApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace BaoApi.Controllers
 {
@@ -21,29 +17,17 @@ namespace BaoApi.Controllers
         /// <param name="userId"></param>
         /// <returns>JWT string</returns>
         [HttpPost]
-        public string Login([BindRequired] string userId)
+        public string LoginByUid([BindRequired] string userId)
         {
-            var token = new JwtSecurityToken(
-                claims:
-                [
-                    new Claim(ClaimTypes.Name, userId),
-                ],
-                expires: DateTime.Now.AddMinutes(_Fun.TimeOut),
-                signingCredentials: new SigningCredentials(
-                    _Login.GetJwtKey(),
-                    SecurityAlgorithms.HmacSha256
-                )
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return _Login.GetJwtAuthStr(userId);
         }
 
-        //testing
+        //使用 postMan 測試可檢視詳細錯誤訊息
         [Authorize]
         [HttpPost]
-        public string AfterLogin()
+        public string CheckAuth()
         {
-            return $"After Login OK, your userId={_Fun.UserId()}";
+            return $"Your userId={_Fun.UserId()}";
         }
 
     }//class

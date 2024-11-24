@@ -1,4 +1,5 @@
 ﻿using BaoLib.Enums;
+using BaoLib.Services;
 using Base.Models;
 using Base.Services;
 using Newtonsoft.Json.Linq;
@@ -11,11 +12,14 @@ namespace BaoApi.Services
         private readonly ReadDto readDto = new()
         {
             ReadSql = $@"
-select b.IsMove, b.IsBatch, b.IsMoney, 
-    b.StartTime, Corp=c.Name,
-    b.Id, b.Name
+select b.*, 
+    AnswerTypeName=x.Name,
+    PrizeTypeName=x2.Name,
+    Corp=c.Name
 from dbo.Bao b
 join dbo.UserCust c on b.Creator=c.Id
+join dbo.XpCode x on x.Type='{_XpLib.AnswerType}' and b.AnswerType=x.Value
+join dbo.XpCode x2 on x2.Type='{_XpLib.PrizeType}' and b.PrizeType=x2.Value
 where b.StartTime < cast(getDate() as date)
 and b.EndTime > getdate()
 and b.Status=1

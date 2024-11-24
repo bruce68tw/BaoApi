@@ -1,4 +1,5 @@
 ﻿using BaoApi.Models;
+using BaoLib.Enums;
 using Base.Services;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System;
@@ -37,11 +38,11 @@ order by s.Sort
         public async Task<byte[]?> GetStepImageA(string baoId)
         {
             //get one baoStage
-            var sql = @"
+            var sql = $@"
 select s.Id, s.Sort, s.FileName, s.AppHint
 from dbo.BaoStage s
 join dbo.BaoAttend t on t.BaoId=@BaoId and t.UserId=@UserId
-join dbo.Bao b on b.Id=@BaoId and b.IsBatch=0
+join dbo.Bao b on b.Id=@BaoId and b.AnswerType='{AnswerTypeEstr.Batch}'
 where s.BaoId=@BaoId
 and s.Sort+1=t.NowLevel
 ";
