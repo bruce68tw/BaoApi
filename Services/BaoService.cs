@@ -1,4 +1,5 @@
 ﻿using BaoLib.Enums;
+using BaoLib.Services;
 using Base.Services;
 using DocumentFormat.OpenXml.Drawing.Diagrams;
 using DocumentFormat.OpenXml.Office2010.ExcelAc;
@@ -36,12 +37,14 @@ namespace BaoApi.Services
                 //get from DB, cannot read BaoAttend here, coz Redis 
                 var sql = $@"
 select b.*,
+    AnswerTypeName=x.Name,
     Corp=u.Name
 from dbo.Bao b
+join dbo.XpCode x on x.Type='{_XpLib.AnswerType}' and b.AnswerType=x.Value
 join dbo.UserCust u on b.Creator=u.Id
 where b.Id=@Id
 ";
-                row = await _Db.GetRowA(sql, new() { "Id", id });
+                row = await _Db.GetRowA(sql, ["Id", id]);
 
                 //write redis
                 //if (row != null) _Cache.SetStr(userId, key, _Json.ToStr(row));
