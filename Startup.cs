@@ -12,9 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
 using System.Data.Common;
 using System.Data.SqlClient;
 
@@ -64,6 +62,9 @@ namespace BaoApi
             var xpConfig = new XpConfigDto();
             Configuration.GetSection("XpConfig").Bind(xpConfig);
             _Xp.Config = xpConfig;
+
+            //set global variables
+            _Fun.JwtKey = _Xp.JwtKey;
 
             //沒有使用cache for session
 

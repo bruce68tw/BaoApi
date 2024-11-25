@@ -13,7 +13,7 @@ namespace BaoApi.Services
     {
         //AES & JWT key
         private const string AesKey = "YourAesKey";
-        //private const string JwtKey = "YourJwtKey";
+        public const string JwtKey = "YourJwtKey";
 
         //cms type msg
         public const string CmsMsg = "M";
