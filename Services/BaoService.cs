@@ -22,8 +22,8 @@ namespace BaoApi.Services
             if (!_Str.CheckKey(id)) return null;
 
             //get redis key: BaoDetail + baoId
-            var userId = _Fun.UserId();
-            var key = RedisTypeEstr.BaoDetail + id;
+            //var userId = _Fun.UserId();
+            //var key = RedisTypeEstr.BaoDetail + id;
             //var value = _Cache.GetStr(userId, key);
             JObject? row;
             /*

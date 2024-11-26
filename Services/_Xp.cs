@@ -28,7 +28,7 @@ namespace BaoApi.Services
         //public static string DirCms = Config.DirCms;
 
         //set value
-        private static readonly string _aesKey16 = _Str.PreZero(16, AesKey, true);
+        //private static readonly string _aesKey16 = _Str.PreZero(16, AesKey, true);
         //private static readonly SymmetricSecurityKey _jwtKey16 =
         //    new(Encoding.UTF8.GetBytes(_Str.PreZero(16, JwtKey, true)));
 

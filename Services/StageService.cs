@@ -137,7 +137,7 @@ and UserId=@UserId
         /// <param name="baoId"></param>
         /// <param name="reply"></param>
         /// <returns>0(fail), 1(ok)</returns>
-        public async Task<string> ReplyStepA(string baoId, string stageId, string reply)
+        public async Task<string> ReplyOneA(string baoId, string stageId, string reply)
         {
             var result = "0";   //initial return value
             var userId = _Fun.UserId();
@@ -147,7 +147,7 @@ and UserId=@UserId
             //get Bao.StageCount, BaoStage.Id, Answer
             //如果是Step, 必須判斷是否為目前進行的關卡
             var sql = @$"
-select b.AnswerType, b.MaxError, b.StageCount, s.Answer, s.Sort
+select b.AnswerType, b.StageMaxError, b.StageCount, s.Answer, s.Sort
 from dbo.BaoStage s
 join dbo.BaoAttend a on s.BaoId=a.BaoId
 join dbo.Bao b on a.BaoId=b.Id
@@ -171,10 +171,10 @@ and (b.AnswerType='{AnswerTypeEstr.AnyStep}' or s.Sort+1=a.NowLevel)
             //compare reply & answer
             if (json["Answer"]!.ToString() != replyMd5)
             {
-                var maxError = Convert.ToInt16(json["MaxError"]!);
+                var maxError = Convert.ToInt16(json["StageMaxError"]!);
                 if (maxError > 0)
                 {
-                    var replyCount = await db.GetIntA("select count(*) from dbo.BaoReply where BaoId=@BaoId and StageId=@StageId", args);
+                    var replyCount = await db.GetIntA("select count(*) from dbo.BaoReply where BaoId=@BaoId and StageId=@StageId and UserId=@UserId", args);
                     result = (replyCount >= maxError) ? "-1" : "0";
                 }
                 goto lab_exit;
@@ -214,7 +214,7 @@ and (b.AnswerType='{AnswerTypeEstr.AnyStep}' or s.Sort+1=a.NowLevel)
         /// <param name="baoId"></param>
         /// <param name="reply"></param>
         /// <returns>0(fail), 1(ok)</returns>
-        public async Task<string> ReplyBatchA(string baoId, string reply)
+        public async Task<string> ReplyAllA(string baoId, string reply)
         {
             //write user reply first
             var result = "0";   //initial return value
