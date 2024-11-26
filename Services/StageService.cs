@@ -50,7 +50,7 @@ and s.Sort+1=t.NowLevel
         }
 
         /// <summary>
-        /// get image zip file, 圖檔名稱: Sort+1,StageId,Hint
+        /// get image zip file, 圖檔名稱(底線分隔): Sort+1,StageId,Hint
         /// </summary>
         /// <param name="sql">sql for read BaoStage</param>
         /// <param name="rows">BaoStage rows</param>
@@ -97,15 +97,16 @@ and s.Sort+1=t.NowLevel
             return ms.ToArray();
         }
 
-        private async Task<bool> AddReplyA(string baoId, string userId, string reply, Db db)
+        private async Task<bool> AddReplyA(string baoId, string stageId, string userId, string reply, Db db)
         {
             var sql = @"
-insert dbo.BaoReply(Id, BaoId, UserId, Reply, Created)
-values(@Id, @BaoId, @UserId, @Reply, @Created)
+insert dbo.BaoReply(Id, BaoId, StageId, UserId, Reply, Created)
+values(@Id, @BaoId, @StageId, @UserId, @Reply, @Created)
 ";
             var args = new List<object>() {
                 "Id", _Str.NewId(),
                 "BaoId", baoId,
+                "StageId", stageId,
                 "UserId", userId,
                 "Reply", reply,
                 "Created", _Date.NowDbStr()
@@ -114,11 +115,11 @@ values(@Id, @BaoId, @UserId, @Reply, @Created)
             return (await db.ExecSqlA(sql, args) == 1);
         }
 
-        private async Task<bool> SetReplyRightA(string baoId, string userId, Db db)
+        private async Task<bool> SetAttendFinishA(string baoId, string userId, Db db)
         {
-            var sql = @"
+            var sql = $@"
 update dbo.BaoAttend set
-    AttendStatus='9'
+    AttendStatus='{AttendStatusEstr.Finish}'
 where BaoId=@BaoId
 and UserId=@UserId
 ";
@@ -136,7 +137,7 @@ and UserId=@UserId
         /// <param name="baoId"></param>
         /// <param name="reply"></param>
         /// <returns>0(fail), 1(ok)</returns>
-        public async Task<string> ReplyStepA(string baoId, string reply)
+        public async Task<string> ReplyStepA(string baoId, string stageId, string reply)
         {
             var result = "0";   //initial return value
             var userId = _Fun.UserId();
@@ -144,33 +145,56 @@ and UserId=@UserId
             //await db.BeginTranA();
 
             //get Bao.StageCount, BaoStage.Id, Answer
+            //如果是Step, 必須判斷是否為目前進行的關卡
             var sql = @$"
-select b.StageCount, StageId=s.Id, s.Answer, s.Sort
+select b.AnswerType, b.MaxError, b.StageCount, s.Answer, s.Sort
 from dbo.BaoStage s
-join dbo.BaoAttend a on s.BaoId=a.BaoId and s.Sort+1=a.NowLevel
+join dbo.BaoAttend a on s.BaoId=a.BaoId
 join dbo.Bao b on a.BaoId=b.Id
 where s.BaoId=@BaoId
+and s.Id=@StageId
 and a.UserId='{userId}'
+and (b.AnswerType='{AnswerTypeEstr.AnyStep}' or s.Sort+1=a.NowLevel)
 ";
-            var json = await db.GetRowA(sql, new() { "BaoId", baoId });
+            //join dbo.BaoAttend a on s.BaoId = a.BaoId and s.Sort + 1 = a.NowLevel
+            var args = new List<object>() { "BaoId", baoId, "StageId", stageId, "UserId", userId };
+            var json = await db.GetRowA(sql, args);
             if (json == null)
                 goto lab_exit;
 
             //write user reply first
-            if (!await AddReplyA(json["StageId"]!.ToString(), userId, reply, db))
+            var replyMd5 = _Str.Md5(reply.Trim());
+            if (!await AddReplyA(baoId, stageId, userId, replyMd5, db))
                 goto lab_exit;
 
+            //case of 答題錯誤
             //compare reply & answer
-            if (json["Answer"]!.ToString() != _Str.Md5(reply.Trim()))
+            if (json["Answer"]!.ToString() != replyMd5)
+            {
+                var maxError = Convert.ToInt16(json["MaxError"]!);
+                if (maxError > 0)
+                {
+                    var replyCount = await db.GetIntA("select count(*) from dbo.BaoReply where BaoId=@BaoId and StageId=@StageId", args);
+                    result = (replyCount >= maxError) ? "-1" : "0";
+                }
                 goto lab_exit;
+            }
 
-            //如果為最後一關, 則設定為答題成功, 否則update BaoAttend.NowLevel(base 1)
-            var sort = Convert.ToInt32(json["Sort"]);   //base 0
-            var stageCount = Convert.ToInt32(json["StageCount"]);
-            var status = (sort + 1 >= stageCount)
-                ? await SetReplyRightA(baoId, userId, db)
-                : (await db.ExecSqlA($"update dbo.BaoAttend set NowLevel={sort + 2} where BaoId='{baoId}' and UserId='{userId}'") == 1);
-            result = status ? "1" : "0";
+            //case of 答題正確
+            //Step時, 如果為最後一關, 則設定為答題成功(NowLevel大於關卡數目), 否則update BaoAttend.NowLevel(base 1)
+            if (json["AnswerType"]!.ToString() == AnswerTypeEstr.Step)
+            {
+                var sort = Convert.ToInt32(json["Sort"]);   //base 0
+                var stageCount = Convert.ToInt32(json["StageCount"]);
+                var status = (sort + 1 >= stageCount)
+                    ? await SetAttendFinishA(baoId, userId, db)
+                    : (await db.ExecSqlA($"update dbo.BaoAttend set NowLevel={sort + 2} where BaoId='{baoId}' and UserId='{userId}'") == 1);
+                result = status ? "1" : "0";
+            }
+            else
+            {
+
+            }
 
         lab_exit:
             /*
@@ -198,23 +222,8 @@ and a.UserId='{userId}'
             var db = new Db();
             //await db.BeginTranA();
 
+            /* //todo
             if (!await AddReplyA(baoId, userId, reply, db))
-                goto lab_exit;
-            /*
-            var sql = @"
-insert dbo.BaoReply(Id, BaoId, UserId, Reply, Created)
-values(@Id, @BaoId, @UserId, @Reply, @Created)
-";
-            var args = new List<object>() {
-                "Id", _Str.NewId(),
-                "BaoId", baoId,
-                "UserId", userId,
-                "Reply", reply,
-                "Created", _Date.NowDbStr()
-            };
-
-            var db = new Db();
-            if (await db.ExecSqlA(sql, args) != 1)
                 goto lab_exit;
             */
 
@@ -252,19 +261,8 @@ order by s.Sort
             }
 
             //case of right answer
-            result = await SetReplyRightA(baoId, userId, db)
+            result = await SetAttendFinishA(baoId, userId, db)
                 ? "1" : "0";
-            /*
-            //set BaoAttend.AttendStatus
-            sql = @"
-update dbo.BaoAttend set
-    AttendStatus='9'
-where BaoId=@BaoId
-and UserId=@UserId
-";
-            await db.ExecSqlA(sql, args);
-            result = "1";
-            */
 
         lab_exit:
             /*

@@ -55,9 +55,9 @@ namespace BaoApi.Controllers
         /// <param name="reply"></param>
         /// <returns>0(fail), 1(ok)</returns>
         [HttpPost]
-        public async Task<string> ReplyStep([BindRequired] string id, [BindRequired] string reply)
+        public async Task<string> ReplyStep([BindRequired] string baoId, [BindRequired] string stageId, [BindRequired] string reply)
         {
-            return await new StageService().ReplyStepA(id, reply);
+            return await new StageService().ReplyStepA(baoId, reply);
         }
 
     }//class

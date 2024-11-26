@@ -88,7 +88,7 @@ where b.Id=@Id
             //insert BaoAttend
             var sql = @$"
 insert into dbo.BaoAttend(UserId, BaoId, AttendStatus, NowLevel, Created) values
-('{userId}', @Id, '1', 1, getdate())
+('{userId}', @Id, '{AttendStatusEstr.Attend}', 1, getdate())
 ";
             var rowCount = await db.ExecSqlA(sql, args);
             await db.DisposeAsync();
