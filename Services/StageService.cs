@@ -1,6 +1,7 @@
 ﻿using BaoApi.Models;
 using BaoLib.Enums;
 using Base.Services;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,12 @@ order by s.Sort
             return await _Db.GetRowsA(sql, ["BaoId", baoId, "UserId", _Fun.UserId()]);
         }
 
+        /// <summary>
+        /// 讀取目前關卡的圖檔, 將欄位資訊寫入下載的檔名, 前端解析
+        /// 檔名為 sort+1,stageId,custHint
+        /// </summary>
+        /// <param name="baoId"></param>
+        /// <returns></returns>
         public async Task<byte[]?> GetBatchImageA(string baoId)
         {
             //get baoStage list
@@ -46,11 +53,12 @@ and exists (
 )
 order by s.Sort
 ";
-            return await GetZipImageA(sql, baoId);
+            return await GetZipImageA(sql, baoId, true);
         }
 
         /// <summary>
         /// 讀取目前關卡的圖檔, 將欄位資訊寫入下載的檔名, 前端解析
+        /// 檔名為 stageId
         /// </summary>
         /// <param name="baoId"></param>
         /// <returns></returns>
@@ -65,7 +73,7 @@ join dbo.Bao b on b.Id=@BaoId and b.AnswerType='{AnswerTypeEstr.Step}'
 where s.BaoId=@BaoId
 and s.Sort+1=t.NowLevel
 ";
-            return await GetZipImageA(sql, baoId);
+            return await GetZipImageA(sql, baoId, false);
         }
 
         /// <summary>
@@ -73,8 +81,9 @@ and s.Sort+1=t.NowLevel
         /// </summary>
         /// <param name="sql">sql for read BaoStage</param>
         /// <param name="rows">BaoStage rows</param>
+        /// <param name="combineName">是否使用合併檔名</param>
         /// <returns></returns>
-        private async Task<byte[]?> GetZipImageA(string sql, string baoId)
+        private async Task<byte[]?> GetZipImageA(string sql, string baoId, bool combineName)
         {
             //1.read BaoStage table
             var args = new List<object>() {
@@ -97,17 +106,24 @@ and s.Sort+1=t.NowLevel
                     var ext = "." + _File.GetFileExt(row.FileName);
                     var path = $"{_Xp.DirStageImage()}FileName_{rowId}{ext}";
                     var preZero = "";
-                    //3.如果檔案不存在則檔名前面加00
+                    //3.如果檔案不存在則使用空白圖檔, 檔名前面加00(前端判斷)
                     if (!File.Exists(path))
                     {
                         path = _Fun.NoImagePath;
                         preZero = "00";
                     }
-                    var hint = row.AppHint.Trim();
-                    if (hint != "") rowId += "_" + hint;
 
-                    //4.寫入 zip, ex: 1_xxx_.png
-                    zip.CreateEntryFromFile(path, $"{sort + 1}_{preZero}{rowId}_{ext}");
+                    var name = $"{preZero}{rowId}.{ext}";
+                    if (combineName)
+                    {
+                        name = $"{sort + 1}_{name}";
+                        var hint = row.AppHint.Trim();
+                        if (hint != "") 
+                            name = $"{name}_{hint}";
+                    }
+
+                    //4.寫入 zip, ex: 1_[00]xxx_.png
+                    zip.CreateEntryFromFile(path, name);
                 }
             }
 

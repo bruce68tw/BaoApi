@@ -16,37 +16,37 @@ namespace BaoApi.Controllers
         /// <summary>
         /// get batch stage images zip file
         /// </summary>
-        /// <param name="id">bao.Id</param>
+        /// <param name="baoId">bao.Id</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<FileResult> GetBatchImage([BindRequired] string id)
+        public async Task<FileResult> GetBatchImage([BindRequired] string baoId)
         {
-            var bytes = await new StageService().GetBatchImageA(id);
+            var bytes = await new StageService().GetBatchImageA(baoId);
             return File(bytes!, "application/zip");
         }
 
         /// <summary>
         /// get step stage images zip file
         /// </summary>
-        /// <param name="id">bao.Id</param>
+        /// <param name="baoId">bao.Id</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<FileResult> GetStepImage([BindRequired] string id)
+        public async Task<FileResult> GetStepImage([BindRequired] string baoId)
         {
-            var bytes = await new StageService().GetStepImageA(id);
+            var bytes = await new StageService().GetStepImageA(baoId);
             return File(bytes!, "application/zip");
         }
 
         /// <summary>
         /// batch reply
         /// </summary>
-        /// <param name="id">Bao.Id</param>
+        /// <param name="baoId">Bao.Id</param>
         /// <param name="reply"></param>
         /// <returns>0(fail), 1(ok)</returns>
         [HttpPost]
-        public async Task<string> ReplyAll([BindRequired] string id, [BindRequired] string reply)
+        public async Task<string> ReplyAll([BindRequired] string baoId, [BindRequired] string reply)
         {
-            return await new StageService().ReplyAllA(id, reply);
+            return await new StageService().ReplyAllA(baoId, reply);
         }
 
         /// <summary>
