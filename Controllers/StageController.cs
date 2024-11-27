@@ -3,6 +3,7 @@ using BaseApi.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 
 namespace BaoApi.Controllers
@@ -58,6 +59,13 @@ namespace BaoApi.Controllers
         public async Task<string> ReplyOne([BindRequired] string baoId, [BindRequired] string stageId, [BindRequired] string reply)
         {
             return await new StageService().ReplyOneA(baoId, stageId, reply);
+        }
+
+        //讀取某個尋寶的全部關卡, 會判斷用戶是否參加
+        [HttpPost]
+        public async Task<JArray?> GetRows([BindRequired] string baoId)
+        {
+            return await new StageService().GetRowsA(baoId);
         }
 
     }//class

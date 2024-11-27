@@ -1,7 +1,7 @@
 ﻿using BaoApi.Models;
 using BaoLib.Enums;
 using Base.Services;
-using DocumentFormat.OpenXml.Spreadsheet;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,6 +12,25 @@ namespace BaoApi.Services
 {
     public class StageService
     {
+        public async Task<JArray?> GetRowsA(string baoId)
+        {
+            //如果UserAppStage有對應資料會一併傳回
+            var sql = @"
+select s.*, us.*
+from dbo.BaoStage s
+left join dbo.UserAppStage us on s.Id=us.StageId and us.UserId=@UserId
+where s.BaoId=@BaoId
+and exists (
+    select BaoId 
+    from dbo.BaoAttend
+    where BaoId=s.BaoId
+    and UserId=@UserId
+)
+order by s.Sort
+";
+            return await _Db.GetRowsA(sql, ["BaoId", baoId, "UserId", _Fun.UserId()]);
+        }
+
         public async Task<byte[]?> GetBatchImageA(string baoId)
         {
             //get baoStage list
@@ -193,7 +212,7 @@ and (b.AnswerType='{AnswerTypeEstr.AnyStep}' or s.Sort+1=a.NowLevel)
             }
             else
             {
-
+                //todo
             }
 
         lab_exit:

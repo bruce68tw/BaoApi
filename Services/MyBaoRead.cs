@@ -11,11 +11,10 @@ namespace BaoApi.Services
         private readonly ReadDto readDto = new()
         {
             ReadSql = $@"
-select b.IsMove, 
+select b.*, 
     AnswerTypeName=x.Name,
     PrizeTypeName=x2.Name,
-    b.StartTime, Corp=c.Name,
-    b.Id, b.Name
+    Corp=c.Name
 from dbo.Bao b
 join dbo.UserCust c on b.Creator=c.Id
 join dbo.BaoAttend a on b.Id=a.BaoId
