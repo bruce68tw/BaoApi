@@ -37,10 +37,10 @@ namespace BaoApi.Services
                 //get from DB, cannot read BaoAttend here, coz Redis 
                 var sql = $@"
 select b.*,
-    AnswerTypeName=x.Name,
+    ReplyTypeName=x.Name,
     Corp=u.Name
 from dbo.Bao b
-join dbo.XpCode x on x.Type='{_XpLib.AnswerType}' and b.AnswerType=x.Value
+join dbo.XpCode x on x.Type='{_XpLib.ReplyType}' and b.ReplyType=x.Value
 join dbo.UserCust u on b.Creator=u.Id
 where b.Id=@Id
 ";

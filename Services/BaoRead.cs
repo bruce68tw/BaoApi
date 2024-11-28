@@ -13,12 +13,12 @@ namespace BaoApi.Services
         {
             ReadSql = $@"
 select b.*, 
-    AnswerTypeName=x.Name,
+    ReplyTypeName=x.Name,
     PrizeTypeName=x2.Name,
     Corp=c.Name
 from dbo.Bao b
 join dbo.UserCust c on b.Creator=c.Id
-join dbo.XpCode x on x.Type='{_XpLib.AnswerType}' and b.AnswerType=x.Value
+join dbo.XpCode x on x.Type='{_XpLib.ReplyType}' and b.ReplyType=x.Value
 join dbo.XpCode x2 on x2.Type='{_XpLib.PrizeType}' and b.PrizeType=x2.Value
 where b.StartTime < cast(getDate() as date)
 and b.EndTime > getdate()
