@@ -235,7 +235,11 @@ and UserId='{userId}'
         /// <returns>0(fail), 1(ok), -1(答錯&鎖定)</returns>
         public async Task<string> ReplyOneA(string baoId, string stageId, string reply)
         {
-            var result = "0";   //initial return value
+            const string Wrong = "0";
+            const string Right = "1";
+            const string Lock = "-1";
+
+            var result = Wrong;   //initial return value
             var userId = _Fun.UserId();
             var db = new Db();
             //await db.BeginTranA();
@@ -281,7 +285,7 @@ from dbo.StageReplyStatus
 where StageId=@StageId 
 and UserId='{userId}'", argStage);
                     var overError = (replyCount >= stageMaxError);
-                    result = overError ? "-1" : "0";
+                    result = overError ? Lock : Wrong;
 
                     //update/insert StageReplyStatus
                     if (overError)
@@ -326,12 +330,14 @@ values('{userId}', @StageId, '{ReplyStatusEstr.Normal}', 1)
 
             //=== case of 答題正確 ===
             //設定關卡解題成功
+            result = Right;
             rowCount = await db.ExecSqlA($@"
 update dbo.StageReplyStatus 
 set ReplyStatus='{ReplyStatusEstr.Finish}'
 where UserId='{userId}'
 and StageId=@StageId
 ", argStage);
+
             if (rowCount == 0)
             {
                 await db.ExecSqlA($@"
@@ -343,7 +349,7 @@ values('{userId}', @StageId, '{ReplyStatusEstr.Finish}', 0)
             //如果全部答對, 則設定為尋寶成功
             var argBao = new List<object>() { "BaoId", baoId };
             var okCount = await db.GetIntA($@"
-select count(us.*) 
+select count(*) 
 from dbo.StageReplyStatus us
 join dbo.BaoStage s on us.StageId=s.Id 
 where s.BaoId=@BaoId
