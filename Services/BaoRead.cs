@@ -11,13 +11,18 @@ namespace BaoApi.Services
     {
         private readonly ReadDto readDto = new()
         {
+            //對應前端 BaoRowDto.dart
+            //只顯示有效的尋寶資料
             ReadSql = $@"
 select b.*, 
+    bt.AttendStatus,
     ReplyTypeName=x.Name,
     PrizeTypeName=x2.Name,
-    Corp=c.Name
+    Corp=c.Name,
+    BaoStatus=1
 from dbo.Bao b
 join dbo.UserCust c on b.Creator=c.Id
+left join dbo.BaoAttend bt on b.Id=bt.BaoId and bt.UserId='{_Fun.UserId()}'
 join dbo.XpCode x on x.Type='{_XpLib.ReplyType}' and b.ReplyType=x.Value
 join dbo.XpCode x2 on x2.Type='{_XpLib.PrizeType}' and b.PrizeType=x2.Value
 where b.StartTime < cast(getDate() as date)

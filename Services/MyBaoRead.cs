@@ -1,4 +1,5 @@
-﻿using BaoLib.Services;
+﻿using BaoLib.Enums;
+using BaoLib.Services;
 using Base.Models;
 using Base.Services;
 using Newtonsoft.Json.Linq;
@@ -10,18 +11,22 @@ namespace BaoApi.Services
     {
         private readonly ReadDto readDto = new()
         {
+            //讀取全部已參加尋寶, 由前端控制
             ReadSql = $@"
 select b.*, 
+    bt.AttendStatus,
     ReplyTypeName=x.Name,
     PrizeTypeName=x2.Name,
-    Corp=c.Name
+    Corp=c.Name,
+    BaoStatus=case when (b.StartTime < cast(getDate() as date) and 
+        b.EndTime > getdate() and b.Status=1 or b.LaunchStatus='{LaunchStatusEstr.Yes}')
+        then 1 else 0 end
 from dbo.Bao b
 join dbo.UserCust c on b.Creator=c.Id
-join dbo.BaoAttend a on b.Id=a.BaoId
+join dbo.BaoAttend bt on b.Id=bt.BaoId and bt.UserId='{_Fun.UserId()}'
 join dbo.XpCode x on x.Type='{_XpLib.ReplyType}' and b.ReplyType=x.Value
 join dbo.XpCode x2 on x2.Type='{_XpLib.PrizeType}' and b.PrizeType=x2.Value
-where a.UserId='{_Fun.UserId()}'
-order by a.Created desc
+order by bt.Created desc
 ",
         };
 
