@@ -1,4 +1,5 @@
 ﻿using BaoApi.Models;
+using BaoLib.Enums;
 using Base.Models;
 using Base.Services;
 using BaseApi.Services;
@@ -26,6 +27,13 @@ namespace BaoApi.Services
         public static string DirTemplate = _Fun.Dir("_template");
         //public static string DirStageImage = Config.DirStageImage;
         //public static string DirCms = Config.DirCms;
+
+        //Bao status(是否可以進行尋寶), Bao alias=b
+        public static string BaoStatusSql = $@"
+case when (b.StartTime < cast(getDate() as date) and 
+    b.EndTime > getdate() and b.Status=1 or b.LaunchStatus='{LaunchStatusEstr.Yes}')
+    then 1 else 0 end
+";
 
         //set value
         //private static readonly string _aesKey16 = _Str.PreZero(16, AesKey, true);

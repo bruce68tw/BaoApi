@@ -15,11 +15,11 @@ namespace BaoApi.Services
         /// <summary>
         /// get bao detail
         /// </summary>
-        /// <param name="id">bao Id</param>
+        /// <param name="baoId">bao Id</param>
         /// <returns>JObject</returns>
-        public async Task<JObject?> GetDetailA(string id)
+        public async Task<JObject?> GetDetailA(string baoId)
         {
-            if (!_Str.CheckKey(id)) return null;
+            if (!_Str.CheckKey(baoId)) return null;
 
             //get redis key: BaoDetail + baoId
             //var userId = _Fun.UserId();
@@ -37,6 +37,7 @@ namespace BaoApi.Services
                 //get from DB, cannot read BaoAttend here, coz Redis 
                 var sql = $@"
 select b.*,
+    BaoStatus={_Xp.BaoStatusSql},
     ReplyTypeName=x.Name,
     Corp=u.Name
 from dbo.Bao b
@@ -44,7 +45,7 @@ join dbo.XpCode x on x.Type='{_XpLib.ReplyType}' and b.ReplyType=x.Value
 join dbo.UserCust u on b.Creator=u.Id
 where b.Id=@Id
 ";
-                row = await _Db.GetRowA(sql, ["Id", id]);
+                row = await _Db.GetRowA(sql, ["Id", baoId]);
 
                 //write redis
                 //if (row != null) _Cache.SetStr(userId, key, _Json.ToStr(row));

@@ -18,9 +18,7 @@ select b.*,
     ReplyTypeName=x.Name,
     PrizeTypeName=x2.Name,
     Corp=c.Name,
-    BaoStatus=case when (b.StartTime < cast(getDate() as date) and 
-        b.EndTime > getdate() and b.Status=1 or b.LaunchStatus='{LaunchStatusEstr.Yes}')
-        then 1 else 0 end
+    BaoStatus={_Xp.BaoStatusSql}
 from dbo.Bao b
 join dbo.UserCust c on b.Creator=c.Id
 join dbo.BaoAttend bt on b.Id=bt.BaoId and bt.UserId='{_Fun.UserId()}'

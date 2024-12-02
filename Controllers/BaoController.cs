@@ -20,9 +20,9 @@ namespace BaoApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ContentResult> GetDetail([BindRequired] string id)
+        public async Task<ContentResult> GetDetail([BindRequired] string baoId)
         {
-            return JsonToCnt(await new BaoService().GetDetailA(id));
+            return JsonToCnt(await new BaoService().GetDetailA(baoId));
         }
 
         /// <summary>
