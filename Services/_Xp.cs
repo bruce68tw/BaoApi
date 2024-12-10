@@ -30,8 +30,10 @@ namespace BaoApi.Services
 
         //Bao status(是否可以進行尋寶), Bao alias=b
         public static string BaoStatusSql = $@"
-case when (b.StartTime < cast(getDate() as date) and 
-    b.EndTime > getdate() and b.Status=1 or b.LaunchStatus='{LaunchStatusEstr.Yes}')
+case when (b.StartTime < cast(getDate() as date) 
+    and b.EndTime > getdate() 
+    and b.Status=1 
+    and b.LaunchStatus='{LaunchStatusEstr.Already}')
     then 1 else 0 end
 ";
 

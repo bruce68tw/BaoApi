@@ -232,14 +232,14 @@ and UserId='{userId}'
         /// </summary>
         /// <param name="baoId"></param>
         /// <param name="reply"></param>
-        /// <returns>0(fail), 1(ok), -1(答錯&鎖定)</returns>
+        /// <returns>ReplyStageStatusEstr, 0(fail), 1(ok), L(答錯&鎖定), F(完成尋寶)</returns>
         public async Task<string> ReplyOneA(string baoId, string stageId, string reply)
         {
-            const string Wrong = "0";
-            const string Right = "1";
-            const string Lock = "-1";
+            //const string Wrong = "0";
+            //const string Right = "1";
+            //const string Lock = "-1";
 
-            var result = Wrong;   //initial return value
+            var result = ReplyStageStatusEstr.Wrong;   //initial return value
             var userId = _Fun.UserId();
             var db = new Db();
             //await db.BeginTranA();
@@ -280,12 +280,12 @@ and (b.ReplyType='{ReplyTypeEstr.AnyStep}' or s.Sort+1=a.NowLevel)
                 if (stageMaxError > 0)
                 {
                     var replyCount = await db.GetIntA($@"
-select count(*) 
+select ErrorCount
 from dbo.StageReplyStatus
 where StageId=@StageId 
 and UserId='{userId}'", argStage);
                     var overError = (replyCount >= stageMaxError);
-                    result = overError ? Lock : Wrong;
+                    result = overError ? ReplyStageStatusEstr.Lock : ReplyStageStatusEstr.Wrong;
 
                     //update/insert StageReplyStatus
                     if (overError)
@@ -293,8 +293,8 @@ and UserId='{userId}'", argStage);
                         //lock
                         rowCount = await db.ExecSqlA($@"
 update dbo.StageReplyStatus 
-set ReplyStatus='{ReplyStatusEstr.Lock}, 
-    ErrorCount={replyCount}'
+set ReplyStatus='{ReplyStageStatusEstr.Lock}', 
+    ErrorCount={replyCount}
 where UserId='{userId}'
 and StageId=@StageId
 ", argStage);
@@ -302,7 +302,7 @@ and StageId=@StageId
                         {
                             await db.ExecSqlA($@"
 insert into dbo.StageReplyStatus(UserId, StageId, ReplyStatus, ErrorCount) 
-values('{userId}', @StageId, '{ReplyStatusEstr.Lock}', 1)
+values('{userId}', @StageId, '{ReplyStageStatusEstr.Lock}', 1)
 ", argStage);
                         }
                     }
@@ -319,7 +319,7 @@ and StageId=@StageId
                         {
                             await db.ExecSqlA($@"
 insert into dbo.StageReplyStatus(UserId, StageId, ReplyStatus, ErrorCount) 
-values('{userId}', @StageId, '{ReplyStatusEstr.Normal}', 1)
+values('{userId}', @StageId, '{ReplyStageStatusEstr.Wrong}', 1)
 ", argStage);
                         }
                     }
@@ -330,10 +330,10 @@ values('{userId}', @StageId, '{ReplyStatusEstr.Normal}', 1)
 
             //=== case of 答題正確 ===
             //設定關卡解題成功
-            result = Right;
+            result = ReplyStageStatusEstr.Right;
             rowCount = await db.ExecSqlA($@"
 update dbo.StageReplyStatus 
-set ReplyStatus='{ReplyStatusEstr.Finish}'
+set ReplyStatus='{ReplyStageStatusEstr.Right}'
 where UserId='{userId}'
 and StageId=@StageId
 ", argStage);
@@ -342,11 +342,11 @@ and StageId=@StageId
             {
                 await db.ExecSqlA($@"
 insert into dbo.StageReplyStatus(UserId, StageId, ReplyStatus, ErrorCount) 
-values('{userId}', @StageId, '{ReplyStatusEstr.Finish}', 0)
+values('{userId}', @StageId, '{ReplyStageStatusEstr.Right}', 0)
 ", argStage);
             }
 
-            //如果全部答對, 則設定為尋寶成功
+            //如果全部答對, 則設定為尋寶成功, 同時傳回 ReplyBaoStatusEstr.Finish !! (不是 ReplyStageStatusEstr)
             var argBao = new List<object>() { "BaoId", baoId };
             var okCount = await db.GetIntA($@"
 select count(*) 
@@ -354,11 +354,12 @@ from dbo.StageReplyStatus us
 join dbo.BaoStage s on us.StageId=s.Id 
 where s.BaoId=@BaoId
 and UserId='{userId}'
-and us.ReplyStatus='{ReplyStatusEstr.Finish}'
+and us.ReplyStatus='{ReplyStageStatusEstr.Right}'
 ", argBao);
 
             if (okCount == stageCount)
             {
+                result = ReplyBaoStatusEstr.Finish; //important !!
                 if (!await SetAttendFinishA(baoId, userId, db))
                 {
                     await db.ExecSqlA($@"

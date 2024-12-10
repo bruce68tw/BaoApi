@@ -28,7 +28,7 @@ join dbo.XpCode x2 on x2.Type='{_XpLib.PrizeType}' and b.PrizeType=x2.Value
 where b.StartTime < cast(getDate() as date)
 and b.EndTime > getdate()
 and b.Status=1
-and b.LaunchStatus='{LaunchStatusEstr.Yes}'
+and b.LaunchStatus='{LaunchStatusEstr.Already}'
 order by b.StartTime desc
 ",
             /*

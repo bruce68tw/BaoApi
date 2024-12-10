@@ -14,6 +14,11 @@ namespace BaoApi.Controllers
     [Route("[controller]/[action]")]
     public class HomeController : BaseCtrl
     {
+        public string Index()
+        {
+            return "hello";
+        }
+
         /// <summary>
         /// login and get token
         /// </summary>
